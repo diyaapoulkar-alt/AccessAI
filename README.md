@@ -79,71 +79,6 @@ graph TD
 ```
 
 ---
-
-## 🚀 Getting Started
-
-### Prerequisites
-* Node.js (v18.0.0 or higher)
-* npm (v9.0.0 or higher)
-
-### Installation & Local Setup
-
-```bash
-# 1. Clone the repository
-git clone https://github.com/diyaapoulkar-alt/AccessAI.git
-
-# 2. Navigate into the project directory
-cd AccessAI
-
-# 3. Install dependencies
-npm install
-
-# 4. Start the local development server
-npm run dev
-```
-
-Open your browser and navigate to `http://localhost:5173/` to view the running application.
-
----
-
-## 📁 Repository Structure
-
-```
-AccessAI/
-├── index.html
-├── vite.config.js
-├── tailwind.config.js
-├── package.json
-├── README.md
-├── src/
-│   ├── main.jsx
-│   ├── App.jsx
-│   ├── index.css
-│   ├── components/
-│   │   ├── Navbar.jsx
-│   │   ├── Scanner/
-│   │   │   └── ScannerDashboard.jsx
-│   │   ├── VisionReader/
-│   │   │   └── VisionLoudReader.jsx
-│   │   ├── Meeting/
-│   │   │   └── MeetingRoom.jsx
-│   │   ├── Extension/
-│   │   │   └── ExtensionOverlay.jsx
-│   │   ├── ApiSandbox/
-│   │   │   └── ApiPlayground.jsx
-│   │   └── Presentation/
-│   │       ├── GammaPromptGenerator.jsx
-│   │       └── ArchitectureDiagrams.jsx
-│   ├── data/
-│   │   ├── mockScanData.js
-│   │   ├── sampleVisionData.js
-│   │   └── apiExamples.js
-│   └── utils/
-│       ├── contrastChecker.js
-│       ├── ttsEngine.js
-│       └── sttEngine.js
-```
-
 ---
 
 ## 👥 Team & Contributions
@@ -152,9 +87,9 @@ AccessAI/
 | :---: | :--- | :--- | :--- | :--- |
 | **1** | **Diya Annasaheb Poulkar** | **25BCE11424** | **Real-Time Audio & AI Systems Architect** | Vision AI Loud Reader (OCR + TTS), Whisper speech-to-text live meeting tool, REST & WebSocket API Gateway. |
 | **2** | **Diya Payal** | **25BCE11416** | **Accessibility & AI Engine Specialist** | AI alt-text context evaluator, Vision OCR engine for documents/signs, AI prompt templates. |
-| **3** | **Eshaan** | **25BCE10675** | **UX/UI & Compliance Specialist** | Color Vision Deficiency Simulator, WCAG AA/AAA contrast calculator, High-Contrast Yellow/Black & OpenDyslexic UI modes. |
-| **4** | **Ayushi** | **25BCE11169** | **AI Vision & Speech Synthesis Developer** | Core React 18 / Vite app layout, Chrome Extension simulator widget, split-screen meeting view & audio visualizer canvas. |
-| **5** | **Kunwar** | **25BCE11021** | **Integration / Testing Developer** | Developer REST & WebSocket API Sandbox, Chrome Extension simulator widget, downloadable PDF/JSON report exporters. |
+| **3** | **Eshaan Dogra** | **25BCE10675** | **UX/UI & Compliance Specialist** | Color Vision Deficiency Simulator, WCAG AA/AAA contrast calculator, High-Contrast Yellow/Black & OpenDyslexic UI modes. |
+| **4** | **Ayushi Gupta** | **25BCE11169** | **AI Vision & Speech Synthesis Developer** | Core React 18 / Vite app layout, Chrome Extension simulator widget, split-screen meeting view & audio visualizer canvas. |
+| **5** | **Kunwar Singh** | **25BCE11021** | **Integration / Testing Developer** | Developer REST & WebSocket API Sandbox, Chrome Extension simulator widget, downloadable PDF/JSON report exporters. |
 
 ---
 
