@@ -104,12 +104,6 @@ npm run dev
 
 Open your browser and navigate to `http://localhost:5173/` to view the running application.
 
-### Building for Production
-
-```bash
-npm run build
-```
-
 ---
 
 ## 📁 Repository Structure
@@ -154,13 +148,13 @@ AccessAI/
 
 ## 👥 Team & Contributions
 
-| S.No. | Member | Project Role | Major Technical Contribution |
-| :---: | :--- | :--- | :--- |
-| **1** | **Diyaa Poulkar** | **AI Core, Vision & Backend Systems Developer** | Vision AI Loud Reader (OCR + TTS), Whisper speech-to-text live meeting tool, REST & WebSocket API Gateway. |
-| **2** | **Team Member 2** | **AI/ML Alt-Text & WCAG Evaluation Specialist** | Alt-text AI evaluator, DOM heading structure inspector, WCAG 2.1/2.2 AA rule auditor. |
-| **3** | **Team Member 3** | **UI/UX & Color Vision Accessibility Specialist** | Color vision deficiency simulator, WCAG contrast calculator, High-Contrast Yellow/Black & OpenDyslexic UI modes. |
-| **4** | **Team Member 4** | **Frontend & Browser Extension Engineer** | Core React 18 layout, floating Chrome extension overlay inspector, split-screen meeting view. |
-| **5** | **Team Member 5** | **QA, Exporter & Documentation Engineer** | Downloadable PDF/JSON audit report exporters, cross-browser testing, system documentation. |
+| S.No. | Member Name | Registration No. | Project Role | Major Technical Contribution |
+| :---: | :--- | :--- | :--- | :--- |
+| **1** | **Diya Annasaheb Poulkar** | **25BCE11424** | **Real-Time Audio & AI Systems Architect** | Vision AI Loud Reader (OCR + TTS), Whisper speech-to-text live meeting tool, REST & WebSocket API Gateway. |
+| **2** | **Diya Payal** | **25BCE11416** | **Accessibility & AI Engine Specialist** | AI alt-text context evaluator, Vision OCR engine for documents/signs, AI prompt templates. |
+| **3** | **Eshaan** | **25BCE10675** | **UX/UI & Compliance Specialist** | Color Vision Deficiency Simulator, WCAG AA/AAA contrast calculator, High-Contrast Yellow/Black & OpenDyslexic UI modes. |
+| **4** | **Ayushi** | **25BCE11169** | **AI Vision & Speech Synthesis Developer** | Core React 18 / Vite app layout, Chrome Extension simulator widget, split-screen meeting view & audio visualizer canvas. |
+| **5** | **Kunwar** | **25BCE11021** | **Integration / Testing Developer** | Developer REST & WebSocket API Sandbox, Chrome Extension simulator widget, downloadable PDF/JSON report exporters. |
 
 ---
 
