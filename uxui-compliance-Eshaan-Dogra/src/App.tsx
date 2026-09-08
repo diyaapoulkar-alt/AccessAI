@@ -22,6 +22,8 @@ import {
   useAccessibility
 } from './accessibility-theme';
 import { EarthLinesSphere } from './components/EarthLinesSphere';
+import ExtensionSimulator from "./extension/ExtensionSimulator"; 
+import AudienceMeetingView from "./meeting/AudienceMeetingView";
 import {
   Eye,
   Sliders,
@@ -676,7 +678,10 @@ export function AppContent() {
             </div>
           </section>
 
-          {/* Section 4: Deliverable 2 - WCAG 2.1/2.2 AA Contrast Engine */}
+          
+          
+          
+         {/* Section 4: Deliverable 2 - WCAG 2.1/2.2 AA Contrast Engine */}
           <section id="contrast" className="space-y-6 pt-8 border-t border-[#262626] scroll-mt-10">
             <div className="drake-pill">
               <ShieldCheck className="w-3.5 h-3.5 text-[#28e98c]" />
@@ -726,6 +731,7 @@ export function AppContent() {
             </div>
             <AccessibilitySettingsPanel />
           </section>
+          <AudienceMeetingView />
 
           {/* Clean Integrated Footer within Main Stream (No Overlaps) */}
           <footer className="pt-10 border-t border-[#222222] text-xs text-slate-500 flex flex-wrap items-center justify-between gap-4">
@@ -832,7 +838,10 @@ export function AppContent() {
 
       {/* Floating Accessibility Settings Modal Trigger */}
       <AccessibilitySettingsModal />
-    </div>
+
+<ExtensionSimulator />
+
+</div>
   );
 }
 
