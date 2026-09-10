@@ -1,0 +1,212 @@
+/**
+ * High-Contrast Yellow/Black & White/Black Theme Systems
+ * AccessAI - UX/UI & Compliance Suite
+ *
+ * Implements full alternate high-contrast themes exceeding WCAG AAA 7:1 thresholds,
+ * sharp 2px solid boundary borders, and high-visibility focus indicators.
+ */
+
+/* =========================================================================
+   1. HIGH-CONTRAST YELLOW / BLACK THEME (.theme-hc-yellow)
+   Contrast Tokens: #000000 (Black), #FFFF00 (Yellow - 19.5:1), #00FFFF (Cyan - 16.6:1), #FFFFFF (21:1)
+   ========================================================================= */
+
+.theme-hc-yellow {
+  background-color: #000000 !important;
+  color: #FFFF00 !important;
+}
+
+.theme-hc-yellow body,
+.theme-hc-yellow #root,
+.theme-hc-yellow main,
+.theme-hc-yellow header,
+.theme-hc-yellow footer,
+.theme-hc-yellow nav {
+  background-color: #000000 !important;
+  color: #FFFF00 !important;
+}
+
+/* Headings and Titles */
+.theme-hc-yellow h1,
+.theme-hc-yellow h2,
+.theme-hc-yellow h3,
+.theme-hc-yellow h4,
+.theme-hc-yellow h5,
+.theme-hc-yellow h6,
+.theme-hc-yellow strong,
+.theme-hc-yellow b {
+  color: #FFFF00 !important;
+}
+
+/* Body Text, Paragraphs, and Secondary Spans */
+.theme-hc-yellow p,
+.theme-hc-yellow span:not([class*="badge"]):not([class*="btn"]),
+.theme-hc-yellow label,
+.theme-hc-yellow li {
+  color: #FFFFFF !important;
+}
+
+/* Accentuated elements */
+.theme-hc-yellow em,
+.theme-hc-yellow a {
+  color: #00FFFF !important;
+  text-decoration: underline !important;
+}
+
+/* Cards, Panels, Modals, Sections */
+.theme-hc-yellow [class*="bg-slate-"],
+.theme-hc-yellow [class*="bg-gray-"],
+.theme-hc-yellow [class*="bg-zinc-"],
+.theme-hc-yellow [class*="bg-neutral-"],
+.theme-hc-yellow [class*="bg-indigo-"],
+.theme-hc-yellow [class*="bg-emerald-"],
+.theme-hc-yellow [class*="bg-amber-"],
+.theme-hc-yellow [class*="bg-rose-"],
+.theme-hc-yellow article,
+.theme-hc-yellow section,
+.theme-hc-yellow aside {
+  background-color: #000000 !important;
+  border-color: #FFFF00 !important;
+  border-width: 2px !important;
+  border-style: solid !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+/* Interactive Form Controls: Inputs, Selects, Textareas */
+.theme-hc-yellow input,
+.theme-hc-yellow select,
+.theme-hc-yellow textarea {
+  background-color: #000000 !important;
+  color: #FFFFFF !important;
+  border: 2px solid #FFFF00 !important;
+  border-radius: 4px !important;
+}
+
+.theme-hc-yellow input:focus,
+.theme-hc-yellow select:focus,
+.theme-hc-yellow textarea:focus {
+  outline: 3px solid #00FFFF !important;
+  outline-offset: 2px !important;
+}
+
+/* Buttons */
+.theme-hc-yellow button {
+  background-color: #000000 !important;
+  color: #FFFF00 !important;
+  border: 2px solid #FFFF00 !important;
+  font-weight: 700 !important;
+}
+
+.theme-hc-yellow button:hover,
+.theme-hc-yellow button[aria-pressed="true"],
+.theme-hc-yellow button[aria-selected="true"] {
+  background-color: #FFFF00 !important;
+  color: #000000 !important;
+  border-color: #FFFF00 !important;
+}
+
+/* SVGs and Icons */
+.theme-hc-yellow svg {
+  color: #FFFF00 !important;
+  stroke: #FFFF00 !important;
+}
+
+.theme-hc-yellow button:hover svg,
+.theme-hc-yellow button[aria-pressed="true"] svg {
+  color: #000000 !important;
+  stroke: #000000 !important;
+}
+
+/* =========================================================================
+   2. HIGH-CONTRAST WHITE / BLACK THEME (.theme-hc-white)
+   Contrast Tokens: #FFFFFF (White), #000000 (Black - 21:1)
+   ========================================================================= */
+
+.theme-hc-white {
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+}
+
+.theme-hc-white body,
+.theme-hc-white #root,
+.theme-hc-white main,
+.theme-hc-white header,
+.theme-hc-white footer,
+.theme-hc-white nav {
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+}
+
+.theme-hc-white h1,
+.theme-hc-white h2,
+.theme-hc-white h3,
+.theme-hc-white h4,
+.theme-hc-white h5,
+.theme-hc-white h6,
+.theme-hc-white p,
+.theme-hc-white span,
+.theme-hc-white label,
+.theme-hc-white strong {
+  color: #000000 !important;
+}
+
+.theme-hc-white [class*="bg-"] {
+  background-color: #FFFFFF !important;
+  border-color: #000000 !important;
+  border-width: 2px !important;
+  border-style: solid !important;
+  box-shadow: none !important;
+}
+
+.theme-hc-white button {
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+  font-weight: 700 !important;
+}
+
+.theme-hc-white button:hover,
+.theme-hc-white button[aria-pressed="true"] {
+  background-color: #000000 !important;
+  color: #FFFFFF !important;
+}
+
+.theme-hc-white input,
+.theme-hc-white select,
+.theme-hc-white textarea {
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+}
+
+.theme-hc-white svg {
+  color: #000000 !important;
+  stroke: #000000 !important;
+}
+
+/* =========================================================================
+   3. HIGH-VISIBILITY FOCUS INDICATORS (WCAG 2.4.7 Focus Visible & 2.4.11 Focus Appearance)
+   ========================================================================= */
+
+.hc-focus-rings *:focus-visible {
+  outline: 3px solid #FFFF00 !important;
+  outline-offset: 3px !important;
+}
+
+.theme-hc-white.hc-focus-rings *:focus-visible {
+  outline: 3px solid #000000 !important;
+  outline-offset: 3px !important;
+}
+
+/* =========================================================================
+   4. REDUCED MOTION (WCAG 2.3.3 Animation from Interactions)
+   ========================================================================= */
+
+.reduce-motion,
+.reduce-motion * {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}

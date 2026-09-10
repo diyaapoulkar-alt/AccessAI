@@ -1,0 +1,52 @@
+/**
+ * OpenDyslexic & Typographic Accessibility Styles
+ * AccessAI - UX/UI & Compliance Suite
+ */
+
+@import url('https://cdn.jsdelivr.net/npm/opendyslexic@2.1.0/open-dyslexic.min.css');
+
+/* OpenDyslexic Fallback & Specificity */
+.font-opendyslexic,
+.font-opendyslexic * {
+  font-family: 'OpenDyslexic', 'OpenDyslexic3', 'Comic Sans MS', sans-serif !important;
+  letter-spacing: 0.05em !important;
+  word-spacing: 0.1em !important;
+}
+
+/* Text Scaling Utilities */
+.text-scale-100 {
+  font-size: 100%;
+}
+
+.text-scale-115 {
+  font-size: 115%;
+}
+
+.text-scale-130 {
+  font-size: 130%;
+}
+
+.text-scale-150 {
+  font-size: 150%;
+}
+
+/* Line Spacing Utilities (WCAG 1.4.12 Text Spacing) */
+.line-spacing-normal {
+  line-height: 1.5 !important;
+}
+
+.line-spacing-relaxed {
+  line-height: 1.8 !important;
+}
+
+.line-spacing-loose {
+  line-height: 2.1 !important;
+}
+
+/* Underline All Hyperlinks (WCAG 1.4.1 Use of Color) */
+.underline-all-links a,
+.underline-all-links button[role="link"] {
+  text-decoration: underline !important;
+  text-underline-offset: 4px !important;
+  text-decoration-thickness: 2px !important;
+}
