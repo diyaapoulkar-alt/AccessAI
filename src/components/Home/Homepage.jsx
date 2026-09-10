@@ -8,10 +8,45 @@ import {
   Sparkles, 
   Layers, 
   ArrowRight, 
-  Sliders
+  Sliders,
+  Users,
+  Award
 } from 'lucide-react';
 
 export default function Homepage({ setActiveTab }) {
+  const teamMembers = [
+    {
+      name: "Diya Annasaheb Poulkar",
+      regNo: "25BCE11424",
+      role: "Real-Time Audio & AI Systems Architect",
+      contributions: "Vision AI Loud Reader (OCR + TTS), Whisper speech-to-text live meeting tool, REST & WebSocket API Gateway."
+    },
+    {
+      name: "Diya Payal",
+      regNo: "25BCE11416",
+      role: "Accessibility & AI Engine Specialist",
+      contributions: "AI alt-text context evaluator, Vision OCR engine for documents/signs, AI prompt templates."
+    },
+    {
+      name: "Eshaan Dogra",
+      regNo: "25BCE10675",
+      role: "UX/UI & Compliance Specialist",
+      contributions: "Color Vision Deficiency Simulator, WCAG AA/AAA contrast calculator, High-Contrast Yellow/Black & OpenDyslexic UI modes."
+    },
+    {
+      name: "Ayushi Gupta",
+      regNo: "25BCE11169",
+      role: "AI Vision & Speech Synthesis Developer",
+      contributions: "Core React 18 / Vite app layout, Chrome Extension simulator widget, split-screen meeting view & audio visualizer canvas."
+    },
+    {
+      name: "Kunwar Singh",
+      regNo: "25BCE11021",
+      role: "Integration / Testing Developer",
+      contributions: "Developer REST & WebSocket API Sandbox, Chrome Extension simulator widget, downloadable PDF/JSON report exporters."
+    }
+  ];
+
   const features = [
     {
       id: 'vision',
@@ -160,6 +195,46 @@ export default function Homepage({ setActiveTab }) {
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* Project Team & Major Technical Contributions */}
+      <div className="space-y-4 pt-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg md:text-xl font-extrabold text-stone-900 flex items-center gap-2">
+            <Users className="w-5 h-5 text-amber-700" /> Project Team & Technical Contributions
+          </h2>
+          <span className="text-xs font-bold text-stone-500 bg-stone-100 px-3 py-1 rounded-full border border-stone-200">
+            AccessAI Team Members
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {teamMembers.map((member, idx) => (
+            <div key={idx} className="bg-white border border-stone-200/90 rounded-3xl p-6 shadow-xs space-y-3">
+              <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                <div>
+                  <h3 className="font-extrabold text-stone-900 text-base">{member.name}</h3>
+                  <span className="text-xs font-mono text-amber-700 font-bold">{member.regNo}</span>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-amber-50 border border-amber-200 text-amber-800 flex items-center justify-center font-bold text-xs">
+                  0{idx + 1}
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <span className="text-[11px] font-extrabold text-stone-500 uppercase tracking-wider block">Project Role</span>
+                <p className="text-xs font-bold text-stone-900">{member.role}</p>
+              </div>
+
+              <div className="space-y-1 pt-1">
+                <span className="text-[11px] font-extrabold text-stone-500 uppercase tracking-wider block">Major Contribution</span>
+                <p className="text-xs text-stone-600 leading-relaxed font-medium">
+                  {member.contributions}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 

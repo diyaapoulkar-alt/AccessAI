@@ -30,10 +30,39 @@ class TTSEngine {
     return this.voices.length > 0 ? this.voices : (this.synth ? this.synth.getVoices() : []);
   }
 
+  formatChemicalFormulas(text) {
+    if (!text) return '';
+    const formulaMap = {
+      'CH4': 'C H 4 (Methane)',
+      'H2O': 'H 2 O (Water)',
+      'CO2': 'C O 2 (Carbon Dioxide)',
+      'O2': 'O 2 (Oxygen)',
+      'NH3': 'N H 3 (Ammonia)',
+      'NaCl': 'N a C l (Sodium Chloride)',
+      'C6H12O6': 'C 6 H 12 O 6 (Glucose)'
+    };
+
+    let processed = text;
+    Object.keys(formulaMap).forEach(key => {
+      const regex = new RegExp(`\\b${key}\\b`, 'g');
+      processed = processed.replace(regex, formulaMap[key]);
+    });
+
+    // Expand general chemical formulas like CH4, C2H6 if not in explicit dictionary
+    processed = processed.replace(/\b([A-Z][a-z]?\d+)+\b/g, (match) => {
+      return match.replace(/([A-Z][a-z]?)(\d+)/g, '$1 $2 ');
+    });
+
+    return processed;
+  }
+
   splitIntoChunks(text) {
     if (!text) return [];
+    // Pre-format chemical formulas so speech synthesis pronounces numbers clearly
+    const expandedText = this.formatChemicalFormulas(text);
+
     // Remove markdown symbols (*, #, _, `, ~)
-    const cleanText = text.replace(/[*#_`~]/g, ' ').replace(/\s+/g, ' ').trim();
+    const cleanText = expandedText.replace(/[*#_`~]/g, ' ').replace(/\s+/g, ' ').trim();
     if (!cleanText) return [];
 
     // Split by sentence terminators (. ! ? ; \n) or linebreaks

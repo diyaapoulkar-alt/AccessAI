@@ -58,5 +58,20 @@ export const sampleVisionImages = [
       "Q3 Target: $5.0M"
     ],
     audioScript: "Financial Infographic summary. Second quarter revenue reached 4.2 million dollars, representing a 24 percent year over year growth. Cloud Services accounted for 45 percent of overall business revenue."
+  },
+  {
+    id: "chemistry",
+    title: "Chemical Formula & Molecule Diagram",
+    category: "Science",
+    image: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=800&q=80",
+    extractedText: `Chemical Formula: CH4\nCompound Name: Methane\nMolar Mass: 16.04 g/mol\nStructure: 1 Carbon atom bonded to 4 Hydrogen atoms (Tetrahedral)\nReaction: CH4 + 2 O2 -> CO2 + 2 H2O\nSafety: Flammable Gas - Handle with Ventilation.`,
+    aiExplanation: "This chemical diagram displays the molecular formula CH4 for Methane, composed of 1 Carbon and 4 Hydrogen atoms. It includes the combustion reaction CH4 plus 2 O2 yields CO2 plus 2 H2O.",
+    keyPoints: [
+      "Formula: CH4 (Methane)",
+      "Molar Mass: 16.04 g/mol",
+      "Structure: 1 Carbon + 4 Hydrogens",
+      "Combustion: CH4 + 2 O2 -> CO2 + 2 H2O"
+    ],
+    audioScript: "Attention. Science document recognized for Methane, chemical formula C H 4. Contains one carbon atom bonded to four hydrogen atoms. Reaction equation: C H 4 plus two O 2 yields C O 2 plus two H 2 O."
   }
 ];

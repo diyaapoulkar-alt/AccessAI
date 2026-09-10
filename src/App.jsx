@@ -76,10 +76,10 @@ function AppContent() {
               <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
             </div>
             <span className="font-extrabold text-stone-950">AccessAI Platform</span>
-            <span className="text-stone-500 font-medium">- Architected by Diya Poulkar (25BCE11424)</span>
+            <span className="text-stone-500 font-medium">· Next-Gen Web Accessibility Suite</span>
           </div>
-          <p className="flex items-center gap-1.5 font-bold text-stone-800">
-            <Sparkles className="w-4 h-4 text-amber-800" /> Real-Time AI Audio, Speech & Vision Systems Architecture
+          <p className="flex items-center gap-1.5 font-bold text-stone-700">
+            <Sparkles className="w-4 h-4 text-amber-700" /> WCAG 2.1 / 2.2 AA Compliant Assistive Ecosystem
           </p>
         </div>
       </footer>

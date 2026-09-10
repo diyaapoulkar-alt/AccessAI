@@ -60,12 +60,12 @@ export async function extractRawTextWithGroqVision(imageBase64) {
   const messages = [
     {
       role: "system",
-      content: "You are an expert verbatim OCR text extractor. Your ONLY goal is to transcribe every single printed, typed, or handwritten word, number, sign, label, and table entry from the provided image EXACTLY as written, line by line. Do NOT summarize, explain, or interpret. Return ONLY the verbatim transcribed text."
+      content: "You are an expert verbatim OCR text extractor. Your ONLY goal is to transcribe every single printed, typed, or handwritten word, number, sign, label, chemical formula, and table entry from the provided image EXACTLY as written, line by line. Pay special attention to chemical formulas (e.g. CH4, H2O, CO2), mathematical equations, subscript/superscript numbers, digits, and symbols. Never drop digits or subscripts (ensure CH4 is transcribed as CH4, not CH). Do NOT summarize or interpret. Return ONLY the verbatim transcribed text."
     },
     {
       role: "user",
       content: [
-        { type: "text", text: "Transcribe all text from this image verbatim without summarizing or altering words:" },
+        { type: "text", text: "Transcribe all text from this image verbatim including chemical formulas (e.g. CH4), numbers, digits, and symbols without summarizing or altering words:" },
         {
           type: "image_url",
           image_url: {

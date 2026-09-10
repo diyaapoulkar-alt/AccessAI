@@ -129,19 +129,14 @@ export default function VisionLoudReader() {
         const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imgData.data;
 
-        // Auto contrast adjustment algorithm
-        const contrast = 1.35; // 35% boost
+        // Smooth non-destructive contrast enhancement (preserving anti-aliased glyph edges & numbers like CH4)
+        const contrast = 1.15; // Moderate 15% contrast scaling
         const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
 
         for (let i = 0; i < data.length; i += 4) {
-          // Grayscale luminosity
-          const avg = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-          const cAvg = factor * (avg - 128) + 128;
-          const finalVal = cAvg < 110 ? 0 : cAvg > 190 ? 255 : cAvg; // High legibility thresholding
-
-          data[i] = finalVal;
-          data[i + 1] = finalVal;
-          data[i + 2] = finalVal;
+          data[i] = Math.min(255, Math.max(0, factor * (data[i] - 128) + 128));
+          data[i + 1] = Math.min(255, Math.max(0, factor * (data[i + 1] - 128) + 128));
+          data[i + 2] = Math.min(255, Math.max(0, factor * (data[i + 2] - 128) + 128));
         }
 
         ctx.putImageData(imgData, 0, 0);
