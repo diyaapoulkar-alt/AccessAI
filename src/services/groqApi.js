@@ -76,7 +76,7 @@ export async function extractRawTextWithGroqVision(imageBase64) {
     }
   ];
 
-  return await callGroqApi("llama-3.2-11b-vision-preview", messages, 0.1, 4096);
+  return await callGroqApi("qwen/qwen3.8-27b", messages, 0.1, 600);
 }
 
 /**
@@ -105,7 +105,7 @@ export async function describeImageWithGroq(imageBase64, userPrompt = "Describe 
     }
   ];
 
-  return await callGroqApi("llama-3.2-11b-vision-preview", messages, 0.2, 2048);
+  return await callGroqApi("qwen/qwen3.8-27b", messages, 0.2, 600);
 }
 
 /**
@@ -135,5 +135,5 @@ Rely ONLY on facts stated in the source text. Do NOT hallucinate.`;
     { role: "user", content: `Please simplify and format the following text:\n\n${sourceText}` }
   ];
 
-  return await callGroqApi("llama-3.3-70b-versatile", messages, 0.3, 2048);
+  return await callGroqApi("openai/gpt-oss-120b", messages, 0.3, 600);
 }
