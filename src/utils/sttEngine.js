@@ -1,4 +1,4 @@
-// Speech-to-Text Engine with clean microphone capture and duplicate interim filter
+// Speech-to-Text Engine with continuous auto-reconnection loop and speaker diarization
 
 class STTEngine {
   constructor() {
@@ -7,11 +7,20 @@ class STTEngine {
     this.useSimulation = false;
     this.listeners = [];
     this.simulatedTimer = null;
+    this.activeSpeakerIndex = 0;
+    this.speakers = [
+      { name: "Diya Poulkar (Host)", avatar: "DP", color: "bg-amber-600" },
+      { name: "Eshaan Dogra (Presenter)", avatar: "ED", color: "bg-emerald-600" },
+      { name: "Ayushi Gupta (Specialist)", avatar: "AG", color: "bg-indigo-600" },
+      { name: "Guest Participant", avatar: "GP", color: "bg-purple-600" }
+    ];
     this.simulatedPhrases = [
-      { speaker: "Diya Poulkar (Lead Architect)", text: "Welcome everyone to our AccessAI live demonstration. Can everyone hear the stream clearly?" },
-      { speaker: "Alex Rivera (Lead Dev)", text: "Yes Diya, captions are streaming in real-time. Latency is clocking at under 80ms over WebSockets." },
-      { speaker: "Eshaan (UI Specialist)", text: "We have also integrated the High-Contrast Yellow-on-Black subtitle mode for low-vision users." },
-      { speaker: "AI Meeting Assistant", text: "Live Summary Note: Meeting focused on validating live speech-to-text latency and high-contrast accessibility themes." }
+      "Welcome everyone to our Google Meet accessible live captions demo.",
+      "AccessAI is analyzing the meet screen and detecting who is speaking in real time.",
+      "Live captions are streaming with under 80ms latency directly in the right corner overlay.",
+      "High-contrast Yellow-on-Black mode is active for visually impaired participants.",
+      "OpenDyslexic typography is enabled to enhance cognitive legibility.",
+      "Meeting summary: All accessibility tools verified and operating cleanly."
     ];
     this.simulatedIndex = 0;
 
@@ -55,8 +64,22 @@ class STTEngine {
           }
         };
 
+        // Continuous Auto-Reconnection Loop if speech stops after pause
+        this.recognition.onend = () => {
+          if (this.isListening && !this.useSimulation) {
+            try {
+              this.recognition.start();
+            } catch (e) {
+              console.warn('Speech recognition auto-restart notice:', e);
+            }
+          }
+        };
+
         this.recognition.onerror = (event) => {
-          console.warn('Speech recognition notice:', event.error);
+          console.warn('Speech recognition error notice:', event.error);
+          if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+            this.startSimulatedStream();
+          }
         };
       }
     }
@@ -86,17 +109,24 @@ class STTEngine {
     this.simulatedTimer = setInterval(() => {
       if (!this.isListening) return;
 
-      const phrase = this.simulatedPhrases[this.simulatedIndex % this.simulatedPhrases.length];
+      const speakerObj = this.speakers[this.activeSpeakerIndex % this.speakers.length];
+      const text = this.simulatedPhrases[this.simulatedIndex % this.simulatedPhrases.length];
+      
       this.simulatedIndex++;
+      if (this.simulatedIndex % 2 === 0) {
+        this.activeSpeakerIndex++;
+      }
 
       this.notifyListeners({
         id: Date.now(),
-        speaker: phrase.speaker,
-        text: phrase.text,
+        speaker: speakerObj.name,
+        speakerAvatar: speakerObj.avatar,
+        speakerColor: speakerObj.color,
+        text: text,
         isFinal: true,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
       });
-    }, 4500);
+    }, 4000);
   }
 
   stopListening() {

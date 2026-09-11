@@ -8,6 +8,7 @@ import ContrastView from './components/Contrast/ContrastView';
 import ExtensionInspectorView from './components/Extension/ExtensionInspectorView';
 import ApiPlayground from './components/ApiSandbox/ApiPlayground';
 import ExtensionSimulator from './extension/ExtensionSimulator';
+import MeetExtensionWidget from './extension/MeetExtensionWidget';
 import { AccessibilityProvider } from './accessibility-theme/AccessibilityContext';
 import { ShieldCheck, Sparkles } from 'lucide-react';
 
@@ -65,8 +66,9 @@ function AppContent() {
         {activeTab === 'api' && <ApiPlayground />}
       </main>
 
-      {/* Floating Chrome Extension Audit Widget Overlay */}
+      {/* Floating Chrome Extension Audit Widget Overlay & Google Meet Right-Corner Extension Dock */}
       <ExtensionSimulator />
+      <MeetExtensionWidget />
 
       {/* Footer */}
       <footer className="border-t border-stone-200/80 bg-white/80 backdrop-blur-md py-6 text-center text-xs text-stone-600">
