@@ -1,0 +1,44 @@
+[
+  {
+    "timestamp": "10:51:11 PM",
+    "speaker": "Diya Poulkar (Host)",
+    "role": "Real-Time Audio & AI Systems Architect",
+    "text": "Welcome everyone to today's AccessAI Google Meet live caption session."
+  },
+  {
+    "timestamp": "10:51:14 PM",
+    "speaker": "Eshaan Dogra (Presenter)",
+    "role": "UX/UI & Compliance Specialist",
+    "text": "AccessAI is analyzing the meet screen and detecting who is speaking in real time."
+  },
+  {
+    "timestamp": "10:51:16 PM",
+    "speaker": "Ayushi Gupta (Specialist)",
+    "role": "AI Vision & Speech Synthesis Developer",
+    "text": "Live captions are streaming with under 80ms latency directly in the floating extension overlay."
+  },
+  {
+    "timestamp": "10:51:19 PM",
+    "speaker": "Kunwar Singh (Auditor)",
+    "role": "Integration & Testing Developer",
+    "text": "High-contrast Yellow-on-Black subtitle mode is active for low-vision participants."
+  },
+  {
+    "timestamp": "10:51:21 PM",
+    "speaker": "Diya Poulkar (Host)",
+    "role": "Real-Time Audio & AI Systems Architect",
+    "text": "OpenDyslexic typography support and speaker diarization are working cleanly."
+  },
+  {
+    "timestamp": "10:51:24 PM",
+    "speaker": "Eshaan Dogra (Presenter)",
+    "role": "UX/UI & Compliance Specialist",
+    "text": "Meeting summary: All WCAG 2.1 AA accessibility standards verified and operating smoothly."
+  },
+  {
+    "timestamp": "10:51:26 PM",
+    "speaker": "Ayushi Gupta (Specialist)",
+    "role": "AI Vision & Speech Synthesis Developer",
+    "text": "Welcome everyone to today's AccessAI Google Meet live caption session."
+  }
+]
