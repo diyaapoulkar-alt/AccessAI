@@ -5,10 +5,17 @@ import tempfile
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 
 from alt_text.evaluator import evaluate_alt_text
+from alt_text.prompts import PROMPT_TEMPLATES
 from ocr.ocr_engine import extract_text
 
 
 app = FastAPI(title="AI Accessibility Engine")
+
+
+@app.get("/prompt-templates")
+def prompt_templates():
+    """Return the prompt templates used by the accessibility features."""
+    return PROMPT_TEMPLATES
 
 
 @app.post("/evaluate-alt-text")

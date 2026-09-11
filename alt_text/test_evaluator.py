@@ -1,15 +1,10 @@
+import pytest
+
 from evaluator import evaluate_alt_text
 
 
-image_path = "test_image.jpg"
+def test_evaluator_rejects_missing_image(monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
 
-existing_alt_text = "image.jpg"
-
-result = evaluate_alt_text(
-    image_path,
-    existing_alt_text
-)
-
-print("\nACCESSAI RESULT")
-print("================")
-print(result)
+    with pytest.raises(FileNotFoundError):
+        evaluate_alt_text("missing-image.jpg", "photo")
