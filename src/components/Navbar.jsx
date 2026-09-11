@@ -1,14 +1,14 @@
 import React from 'react';
 import { 
   ShieldCheck, 
-  Volume2, 
   Mic, 
   Code, 
   Sparkles, 
   Sliders, 
   Eye,
   Home,
-  Layers
+  FileSearch,
+  ScanSearch
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -21,7 +21,8 @@ export default function Navbar({
 }) {
   const navTabs = [
     { id: 'home', label: 'Home', icon: Home, badge: 'Overview', color: 'text-amber-400' },
-    { id: 'vision', label: 'Vision Reader', icon: Volume2, badge: 'Blind UX', color: 'text-emerald-400' },
+    { id: 'ocr', label: 'OCR Reader', icon: FileSearch, badge: 'Documents', color: 'text-emerald-400' },
+    { id: 'alt-text', label: 'Alt-Text Evaluator', icon: ScanSearch, badge: 'AI Review', color: 'text-cyan-400' },
     { id: 'meeting', label: 'Live Captions', icon: Mic, badge: 'Deaf UX', color: 'text-indigo-400' },
     { id: 'cvd', label: 'CVD Simulator', icon: Eye, badge: 'Vision UX', color: 'text-amber-400' },
     { id: 'contrast', label: 'WCAG Contrast', icon: ShieldCheck, badge: 'Compliance', color: 'text-blue-400' },

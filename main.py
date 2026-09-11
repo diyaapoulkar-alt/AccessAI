@@ -3,6 +3,7 @@ import shutil
 import tempfile
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from openai import APIConnectionError, AuthenticationError, RateLimitError
 
 from alt_text.evaluator import evaluate_alt_text
@@ -11,6 +12,13 @@ from ocr.ocr_engine import extract_text
 
 
 app = FastAPI(title="AI Accessibility Engine")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5178", "http://127.0.0.1:5178"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/prompt-templates")

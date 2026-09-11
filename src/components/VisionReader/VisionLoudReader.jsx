@@ -19,9 +19,9 @@ import {
   Zap,
   FileSearch
 } from 'lucide-react';
-import { createWorker } from 'tesseract.js';
 import { tts } from '../../utils/ttsEngine';
-import { extractRawTextWithGroqVision, describeImageWithGroq, simplifyTextWithGroq, getGroqApiKey } from '../../services/groqApi';
+import { simplifyTextWithGroq, getGroqApiKey } from '../../services/groqApi';
+import { extractTextWithBackend } from '../../services/accessibilityApi';
 import ApiKeyModal from '../ApiKeyModal';
 
 export default function VisionLoudReader() {
@@ -208,31 +208,19 @@ export default function VisionLoudReader() {
       let verbatimOcrText = '';
       let plainExplanation = '';
 
-      // 2. Attempt Groq Vision API first
-      const rawGroqText = await extractRawTextWithGroqVision(preprocessedImage);
+      // Send the image to the Python OCR service used by the final app.
+      const imageResponse = await fetch(preprocessedImage);
+      const imageBlob = await imageResponse.blob();
+      const imageFile = new File([imageBlob], fileName || 'image.jpg', {
+        type: imageBlob.type || 'image/jpeg',
+      });
+      const rawBackendText = await extractTextWithBackend(imageFile);
       setOcrProgress(70);
 
-      if (rawGroqText && rawGroqText.trim().length > 0) {
-        verbatimOcrText = rawGroqText.trim();
-        
-        // Generate AI explanation from verbatim text or vision model
-        const groqExplanation = await simplifyTextWithGroq(verbatimOcrText, 'elementary', targetLang);
-        plainExplanation = groqExplanation || await describeImageWithGroq(preprocessedImage);
-      } else {
-        // 3. Fallback to Multilingual Tesseract.js OCR engine
-        const langMap = { en: 'eng', hi: 'eng+hin', mr: 'eng+mar' };
-        const ocrLang = langMap[targetLang] || 'eng';
-
-        const worker = await createWorker(ocrLang);
-        setOcrProgress(85);
-        const ret = await worker.recognize(preprocessedImage);
-        await worker.terminate();
-
-        verbatimOcrText = ret.data.text.trim() || `[No text detected in ${fileName}]`;
-
-        const groqSimplified = await simplifyTextWithGroq(verbatimOcrText, 'elementary', targetLang);
-        plainExplanation = groqSimplified || `AccessAI Vision extracted text: "${verbatimOcrText}". Content ready for text-to-speech audio.`;
-      }
+      verbatimOcrText = rawBackendText.trim() || `[No text detected in ${fileName}]`;
+      setOcrProgress(85);
+      const groqSimplified = await simplifyTextWithGroq(verbatimOcrText, 'elementary', targetLang);
+      plainExplanation = groqSimplified || `AccessAI Vision extracted text: "${verbatimOcrText}". Content ready for text-to-speech audio.`;
 
       // Compute statistics
       const lines = verbatimOcrText.split('\n').filter(l => l.trim().length > 0).length;

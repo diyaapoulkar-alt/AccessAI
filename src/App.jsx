@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Homepage from './components/Home/Homepage';
 import VisionLoudReader from './components/VisionReader/VisionLoudReader';
+import AltTextEvaluator from './components/AltTextEvaluator';
 import MeetingRoom from './components/Meeting/MeetingRoom';
 import CvdView from './components/Cvd/CvdView';
 import ContrastView from './components/Contrast/ContrastView';
@@ -51,7 +52,8 @@ function AppContent() {
       {/* Main Content Body */}
       <main className="flex-1 pb-20 pt-4">
         {activeTab === 'home' && <Homepage setActiveTab={setActiveTab} />}
-        {activeTab === 'vision' && <VisionLoudReader />}
+        {activeTab === 'ocr' && <VisionLoudReader />}
+        {activeTab === 'alt-text' && <AltTextEvaluator />}
         {activeTab === 'meeting' && (
           <MeetingRoom
             highContrast={highContrast}
