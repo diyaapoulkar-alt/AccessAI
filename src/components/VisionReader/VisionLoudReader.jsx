@@ -261,6 +261,24 @@ export default function VisionLoudReader() {
     }
   };
 
+  const [ocrMode, setOcrMode] = useState('full'); // 'full' (verbatim) or 'summary' (summarized)
+
+  const handlePlayAudioMode = (modeToPlay) => {
+    const activeMode = modeToPlay || ocrMode;
+    const textToRead = activeMode === 'full' 
+      ? (extractedText || "No extracted text available.") 
+      : (aiExplanation || extractedText || "No summary available.");
+
+    if (isPaused) {
+      tts.resume();
+    } else {
+      tts.speak(textToRead, {
+        rate: speechRate,
+        voice: selectedVoice
+      });
+    }
+  };
+
   const handleCopyRawText = () => {
     if (!extractedText) return;
     navigator.clipboard.writeText(extractedText);
@@ -479,24 +497,53 @@ export default function VisionLoudReader() {
           {/* Card 2: AI Plain-Language Explanation & TTS Audio Player (Bottom Card - Saathi Style) */}
           <div className="bg-white border border-stone-200/90 rounded-3xl p-6 md:p-8 shadow-sm space-y-5">
             
+            {/* OCR Mode Selector: Full Loud Reading vs Summarized Loud Reading */}
+            <div className="bg-stone-100 p-1.5 rounded-2xl border border-stone-200 flex items-center gap-2">
+              <button
+                onClick={() => { setOcrMode('full'); tts.stop(); }}
+                className={`flex-1 py-2 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                  ocrMode === 'full' 
+                    ? 'bg-stone-900 text-white shadow-xs' 
+                    : 'bg-transparent text-stone-600 hover:text-stone-900'
+                }`}
+              >
+                <FileText className="w-3.5 h-3.5" />
+                <span>Mode 1: Loud Read Full Text</span>
+              </button>
+
+              <button
+                onClick={() => { setOcrMode('summary'); tts.stop(); }}
+                className={`flex-1 py-2 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                  ocrMode === 'summary' 
+                    ? 'bg-emerald-800 text-white shadow-xs' 
+                    : 'bg-transparent text-stone-600 hover:text-stone-900'
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Mode 2: Loud Read Summarized Text</span>
+              </button>
+            </div>
+
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200/80 pb-4">
               <div>
                 <span className="text-[11px] font-extrabold text-emerald-700 uppercase tracking-wider flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5" /> AI Audio Context Stream
+                  <Sparkles className="w-3.5 h-3.5" /> {ocrMode === 'full' ? 'Full Verbatim Speech Stream' : 'AI Bullet-Point Summary Stream'}
                 </span>
-                <h3 className="text-xl md:text-2xl font-extrabold text-stone-900 mt-0.5">AI Loud Reader & Summary</h3>
+                <h3 className="text-xl md:text-2xl font-extrabold text-stone-900 mt-0.5">
+                  {ocrMode === 'full' ? 'Direct Loud Reader (Full Text)' : 'Summarized Loud Reader'}
+                </h3>
               </div>
 
               {/* Playback Controls */}
               <div className="flex items-center gap-2">
                 {!isPlaying || isPaused ? (
                   <button
-                    onClick={() => handlePlayAudio()}
+                    onClick={() => handlePlayAudioMode(ocrMode)}
                     disabled={!extractedText && !audioScript}
                     className="px-6 py-2.5 rounded-full bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white font-bold text-xs sm:text-sm transition duration-200 shadow-sm hover:scale-[1.02] flex items-center gap-2"
                   >
                     <Play className="w-4 h-4 fill-current" />
-                    <span>{isPaused ? 'Resume' : 'Loud Read'}</span>
+                    <span>{isPaused ? 'Resume' : ocrMode === 'full' ? 'Loud Read Full Text' : 'Loud Read Summary'}</span>
                   </button>
                 ) : (
                   <button

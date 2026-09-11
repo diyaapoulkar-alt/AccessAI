@@ -22,6 +22,7 @@ export default function MeetExtensionWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [isWidgetDismissed, setIsWidgetDismissed] = useState(false);
   const [useSimulation, setUseSimulation] = useState(true);
   const [interimText, setInterimText] = useState('');
   const [captions, setCaptions] = useState([
@@ -43,50 +44,26 @@ export default function MeetExtensionWidget() {
     }
   }, [captions, interimText]);
 
-  useEffect(() => {
-    if (!isListening) {
-      if (animRef.current) cancelAnimationFrame(animRef.current);
-      return;
-    }
-
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let phase = 0;
-
-    const render = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const width = canvas.width;
-      const height = canvas.height;
-
-      ctx.beginPath();
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = '#28e98c';
-
-      for (let x = 0; x < width; x += 5) {
-        const h = Math.sin(x * 0.1 + phase) * (8 + Math.random() * 6);
-        ctx.moveTo(x, height / 2 - h);
-        ctx.lineTo(x, height / 2 + h);
+  const requestDeviceAudioCapture = async () => {
+    try {
+      if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+        const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+        console.log("Device system/tab audio stream acquired:", stream);
       }
-      ctx.stroke();
+    } catch (e) {
+      console.warn("Display Media Audio capture skipped or declined, using Microphone speech recognition fallback:", e);
+    }
+  };
 
-      phase += 0.25;
-      animRef.current = requestAnimationFrame(render);
-    };
-
-    render();
-
-    return () => {
-      if (animRef.current) cancelAnimationFrame(animRef.current);
-    };
-  }, [isListening]);
-
-  const toggleListening = (simulate = true) => {
+  const toggleListening = async (simulate = true) => {
     if (isListening) {
       stt.stopListening();
       setIsListening(false);
       setInterimText('');
     } else {
+      if (!simulate) {
+        await requestDeviceAudioCapture();
+      }
       setIsListening(true);
       setUseSimulation(simulate);
       setInterimText('');
@@ -118,6 +95,8 @@ export default function MeetExtensionWidget() {
   };
 
   const currentText = interimText || (captions.length > 0 ? captions[captions.length - 1].text : 'Listening for Google Meet speech...');
+
+  if (isWidgetDismissed) return null;
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end select-none font-sans">
@@ -192,9 +171,13 @@ export default function MeetExtensionWidget() {
               </button>
 
               <button
-                onClick={() => setIsOpen(false)}
+                onClick={() => {
+                  stt.stopListening();
+                  setIsListening(false);
+                  setIsWidgetDismissed(true);
+                }}
                 className="p-1.5 text-stone-400 hover:text-rose-400 rounded-lg hover:bg-rose-950/50 transition"
-                title="Minimize to Right Corner Dock"
+                title="Close & Hide Extension Overlay"
               >
                 <X className="w-4 h-4" />
               </button>

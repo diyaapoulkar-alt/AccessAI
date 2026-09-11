@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "AccessAI - Google Meet Live Subtitles & Speaker Analyzer",
+  "version": "1.0.0",
+  "description": "Real-time Google Meet live captions, speaker diarization, high contrast subtitles & audio analyzer.",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "*://meet.google.com/*",
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://meet.google.com/*",
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
