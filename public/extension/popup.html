@@ -2,22 +2,22 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>AccessAI Extension</title>
+  <title>AccessAI Taskbar Extension</title>
   <style>
     body {
-      width: 280px;
+      width: 300px;
       margin: 0;
       padding: 16px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #111827;
+      background: #090D16;
       color: #F9FAFB;
     }
     .header {
       display: flex;
       align-items: center;
-      gap: 8px;
+      justify-content: space-between;
       margin-bottom: 14px;
-      border-bottom: 1px solid #374151;
+      border-bottom: 1px solid #1F2937;
       padding-bottom: 10px;
     }
     .header h2 {
@@ -26,23 +26,44 @@
       font-weight: 800;
       color: #10B981;
     }
+    .badge {
+      font-size: 10px;
+      font-weight: bold;
+      background: #065F46;
+      color: #A7F3D0;
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
     .btn {
       width: 100%;
-      padding: 10px;
-      margin-bottom: 8px;
+      padding: 11px;
+      margin-bottom: 10px;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       font-size: 12px;
-      font-weight: bold;
+      font-weight: 800;
       cursor: pointer;
       transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
-    .btn-primary {
+    .btn-green {
       background: #059669;
       color: white;
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
     }
-    .btn-primary:hover {
+    .btn-green:hover {
       background: #047857;
+    }
+    .btn-yellow {
+      background: #FACC15;
+      color: #000000;
+      box-shadow: 0 4px 12px rgba(250, 204, 21, 0.3);
+    }
+    .btn-yellow:hover {
+      background: #EAB308;
     }
     .btn-danger {
       background: #DC2626;
@@ -53,9 +74,10 @@
     }
     .footer-link {
       display: block;
-      margin-top: 10px;
+      margin-top: 12px;
       text-align: center;
       font-size: 11px;
+      font-weight: 700;
       color: #9CA3AF;
       text-decoration: none;
     }
@@ -66,14 +88,15 @@
 </head>
 <body>
   <div class="header">
-    <h2>AccessAI Meet Assistant</h2>
+    <h2>AccessAI Subtitle Taskbar</h2>
+    <span class="badge">v1.0.0</span>
   </div>
 
-  <button id="btn-toggle" class="btn btn-primary">⚡ Toggle Overlay on Page</button>
-  <button id="btn-start" class="btn btn-primary">🎙 Start Live Captions</button>
-  <button id="btn-stop" class="btn btn-danger">⏹ Stop & Hide Overlay</button>
+  <button id="btn-show-taskbar" class="btn btn-yellow">🚀 SHOW SUBTITLE TASKBAR ON THIS PAGE</button>
+  <button id="btn-start" class="btn btn-green">🎙 START DEVICE & MEET CAPTIONS</button>
+  <button id="btn-stop" class="btn btn-danger">⏹ HIDE TASKBAR</button>
 
-  <a href="http://localhost:5178/" target="_blank" class="footer-link">Open AccessAI Platform ➔</a>
+  <a href="http://localhost:5178/" target="_blank" class="footer-link">Open AccessAI Web Platform ➔</a>
 
   <script src="popup.js"></script>
 </body>

@@ -52,7 +52,10 @@
     `;
 
     renderTaskbarContent();
-    document.body.appendChild(taskbarContainer);
+    const targetParent = document.fullscreenElement || document.body || document.documentElement;
+    if (targetParent) {
+      targetParent.appendChild(taskbarContainer);
+    }
   }
 
   function renderTaskbarContent() {
