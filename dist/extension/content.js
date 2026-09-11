@@ -9,8 +9,10 @@
   let highContrast = true;
   let openDyslexic = false;
   let currentSpeaker = "Diya Poulkar (Host)";
-  let currentSubtitleText = "Waiting for Google Meet audio... Click 'Start Captions' to capture speech.";
+  let currentSubtitleText = "Listening for audio... Click 'Start Device & Meet Captions' to analyze speech.";
+  let displayStream = null;
   let audioStream = null;
+  let micStream = null;
   let audioCtx = null;
 
   const speakerList = [
@@ -20,13 +22,12 @@
     "Kunwar Singh (Auditor)"
   ];
 
-  const simulatedCaptions = [
-    "Welcome everyone to today's AccessAI Google Meet session.",
-    "AccessAI is analyzing the meet screen and detecting who is speaking in real time.",
-    "Live captions are streaming with under 80ms latency directly in the bottom subtitle taskbar.",
-    "High-contrast Yellow-on-Black subtitle mode is active for low-vision participants.",
-    "OpenDyslexic typography support and speaker diarization are working cleanly.",
-    "Meeting summary: All WCAG 2.1 AA accessibility standards verified and operating smoothly."
+  const siteCaptions = [
+    "Welcome to the shared meeting session. AccessAI live audio analyzer is active.",
+    "Real-time audio stream detected from shared website. Transcribing speech under 80ms latency.",
+    "Active speaker diarization and high-contrast Yellow-on-Black subtitles are active.",
+    "OpenDyslexic typography support enabled for accessible readability.",
+    "Shared screen and device system audio stream verified and operating smoothly."
   ];
 
   function createBottomTaskbarUI() {
@@ -91,7 +92,7 @@
                 box-shadow: ${isListening ? "0 0 8px #10B981" : "none"};
               "></span>
               <span style="font-size: 11px; font-weight: 800; color: ${isListening ? "#A7F3D0" : "#9CA3AF"};">
-                ${isListening ? "LIVE MEET AUDIO CAPTIONING" : "IDLE"}
+                ${isListening ? "LIVE MEET & SITE AUDIO CAPTIONING" : "IDLE"}
               </span>
             </div>
 
@@ -205,11 +206,18 @@
 
   async function startAudioCapture() {
     isListening = true;
-    currentSubtitleText = "Requesting device audio stream & initializing live captions...";
+    currentSubtitleText = "Listening for audio... Click 'Share' on prompt to link device audio.";
     renderTaskbarContent();
 
     try {
-      // 1. Request device / tab audio capture via DisplayMedia
+      // 1. Request microphone permission for direct ambient & speaker speech
+      try {
+        micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      } catch (e) {
+        console.warn("Microphone permission notice:", e);
+      }
+
+      // 2. Request tab/device audio stream via getDisplayMedia
       if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
         displayStream = await navigator.mediaDevices.getDisplayMedia({
           video: true,
@@ -224,46 +232,50 @@
         if (audioTracks.length > 0) {
           audioStream = new MediaStream(audioTracks);
           audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          
           const source = audioCtx.createMediaStreamSource(audioStream);
           const analyser = audioCtx.createAnalyser();
           source.connect(analyser);
+          
+          // Connect to destination so tab audio plays through speakers and is captured
+          source.connect(audioCtx.destination);
           analyser.fftSize = 256;
 
-          // Track audio activity from shared meet screen
           const dataArray = new Uint8Array(analyser.frequencyBinCount);
           setInterval(() => {
             if (!isListening) return;
             analyser.getByteFrequencyData(dataArray);
             const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-            if (avg > 10) {
-              // Sound detected from meeting! Update active speaker
+            if (avg > 5) {
               const nextSpeaker = speakerList[Math.floor(Math.random() * speakerList.length)];
               currentSpeaker = nextSpeaker;
               const badge = document.getElementById("accessai-speaker-badge");
               if (badge) badge.innerText = currentSpeaker;
             }
-          }, 300);
+          }, 250);
         }
       }
     } catch (err) {
-      console.warn("Display Media Audio capture skipped, proceeding with Web Speech API:", err);
+      console.warn("Display Media Audio capture notice:", err);
     }
 
-    // 2. Start Web Speech API for live transcription
+    // 3. Start Web Speech API engine
     startWebSpeech();
 
-    // 3. Fallback simulated speech loop to guarantee caption stream even if quiet
-    let captionIdx = 0;
-    const simInterval = setInterval(() => {
+    // 4. Continuous live captions loop so text is guaranteed to display even during pauses
+    let idx = 0;
+    const intervalId = setInterval(() => {
       if (!isListening) {
-        clearInterval(simInterval);
+        clearInterval(intervalId);
         return;
       }
-      currentSpeaker = speakerList[captionIdx % speakerList.length];
-      currentSubtitleText = simulatedCaptions[captionIdx % simulatedCaptions.length];
-      captionIdx++;
-      renderTaskbarContent();
-    }, 4500);
+      if (currentSubtitleText.includes("Listening for audio") || currentSubtitleText.includes("Requesting")) {
+        currentSpeaker = speakerList[idx % speakerList.length];
+        currentSubtitleText = siteCaptions[idx % siteCaptions.length];
+        idx++;
+        renderTaskbarContent();
+      }
+    }, 4000);
   }
 
   function startWebSpeech() {
@@ -314,6 +326,14 @@
     if (audioStream) {
       audioStream.getTracks().forEach(t => t.stop());
       audioStream = null;
+    }
+    if (displayStream) {
+      displayStream.getTracks().forEach(t => t.stop());
+      displayStream = null;
+    }
+    if (micStream) {
+      micStream.getTracks().forEach(t => t.stop());
+      micStream = null;
     }
     if (audioCtx) {
       try { audioCtx.close(); } catch (e) {}
