@@ -3,6 +3,7 @@ import shutil
 import tempfile
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from openai import APIConnectionError, AuthenticationError, RateLimitError
 
 from alt_text.evaluator import evaluate_alt_text
 from alt_text.prompts import PROMPT_TEMPLATES
@@ -31,7 +32,15 @@ async def evaluate_uploaded_alt_text(
 
     try:
         return evaluate_alt_text(temporary_path, existing_alt_text)
-    except (FileNotFoundError, RuntimeError) as error:
+    except FileNotFoundError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    except AuthenticationError as error:
+        raise HTTPException(status_code=401, detail="Invalid GROQ_API_KEY") from error
+    except RateLimitError as error:
+        raise HTTPException(status_code=429, detail="Groq quota or rate limit exceeded") from error
+    except APIConnectionError as error:
+        raise HTTPException(status_code=502, detail="Could not connect to Groq") from error
+    except RuntimeError as error:
         raise HTTPException(status_code=400, detail=str(error)) from error
     finally:
         temporary_path.unlink(missing_ok=True)
