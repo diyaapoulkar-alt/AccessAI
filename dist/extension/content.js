@@ -1,4 +1,4 @@
-// AccessAI Injected Google Meet & Site Bottom Subtitle Taskbar Extension
+// AccessAI Injected Google Meet & Shared Site Bottom Yellow Subtitle Taskbar
 (function () {
   if (window.accessAiTaskbarInjected) return;
   window.accessAiTaskbarInjected = true;
@@ -9,7 +9,7 @@
   let highContrast = true;
   let openDyslexic = false;
   let currentSpeaker = "Diya Poulkar (Host)";
-  let currentSubtitleText = "Listening for live audio... Speech captions will display here.";
+  let currentSubtitleText = "Listening for audio from shared website... Subtitles active.";
   let displayStream = null;
   let audioStream = null;
   let micStream = null;
@@ -32,7 +32,8 @@
 
   function createBottomTaskbarUI() {
     if (document.getElementById("accessai-meet-taskbar")) {
-      document.getElementById("accessai-meet-taskbar").style.display = "block";
+      const existing = document.getElementById("accessai-meet-taskbar");
+      existing.style.display = "block";
       return;
     }
 
@@ -40,11 +41,11 @@
     taskbarContainer.id = "accessai-meet-taskbar";
     taskbarContainer.style.cssText = `
       position: fixed !important;
-      bottom: 16px !important;
+      bottom: 20px !important;
       left: 50% !important;
       transform: translateX(-50%) !important;
       width: 92% !important;
-      max-width: 1000px !important;
+      max-width: 1020px !important;
       z-index: 2147483647 !important;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
       display: block !important;
@@ -52,7 +53,10 @@
     `;
 
     renderTaskbarContent();
-    document.body.appendChild(taskbarContainer);
+    const targetParent = document.fullscreenElement || document.body || document.documentElement;
+    if (targetParent) {
+      targetParent.appendChild(taskbarContainer);
+    }
   }
 
   function renderTaskbarContent() {
@@ -61,9 +65,9 @@
     taskbarContainer.innerHTML = `
       <div id="accessai-taskbar-inner" style="
         background: #000000 !important;
-        border: 2px solid ${highContrast ? "#FACC15" : "#374151"} !important;
+        border: 3px solid ${highContrast ? "#FACC15" : "#374151"} !important;
         border-radius: 16px !important;
-        box-shadow: 0 20px 30px rgba(0, 0, 0, 0.9), 0 0 20px rgba(250, 204, 21, 0.3) !important;
+        box-shadow: 0 20px 35px rgba(0, 0, 0, 0.95), 0 0 25px rgba(250, 204, 21, 0.35) !important;
         padding: 12px 20px !important;
         color: #FFFFFF !important;
       ">
@@ -152,15 +156,15 @@
           </div>
         </div>
 
-        <!-- Live Subtitle Display Area -->
+        <!-- Live Yellow Subtitle Display Area -->
         <div id="accessai-subtitle-text" style="
           color: ${highContrast ? "#FACC15" : "#FFFFFF"} !important;
           font-family: ${openDyslexic ? "OpenDyslexic, sans-serif" : "inherit"} !important;
-          font-size: 18px !important;
+          font-size: 20px !important;
           line-height: 1.4 !important;
           font-weight: 800 !important;
-          text-shadow: 0 2px 4px rgba(0,0,0,0.9) !important;
-          min-height: 32px !important;
+          text-shadow: 0 2px 6px rgba(0,0,0,0.95), 0 0 10px rgba(250, 204, 21, 0.3) !important;
+          min-height: 36px !important;
           display: flex !important;
           align-items: center !important;
         ">
@@ -207,8 +211,13 @@
   async function startAudioCapture() {
     isListening = true;
     createBottomTaskbarUI();
-    currentSubtitleText = "Listening for live speech... Subtitles active.";
+    currentSubtitleText = "Listening for audio from shared website... Subtitles active.";
     renderTaskbarContent();
+
+    // Broadcast to background service worker to attach yellow taskbar to ALL open tabs
+    try {
+      chrome.runtime.sendMessage({ action: "BROADCAST_YELLOW_TASKBAR" });
+    } catch (e) {}
 
     try {
       // 1. Request microphone input
@@ -260,7 +269,7 @@
         clearInterval(intervalId);
         return;
       }
-      if (currentSubtitleText.includes("Listening for live speech")) {
+      if (currentSubtitleText.includes("Listening for audio") || currentSubtitleText.includes("Subtitles active")) {
         currentSpeaker = speakerList[idx % speakerList.length];
         currentSubtitleText = siteCaptions[idx % siteCaptions.length];
         idx++;
@@ -337,7 +346,9 @@
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === "TOGGLE_OVERLAY" || message.action === "START_CAPTIONS") {
       createBottomTaskbarUI();
-      startAudioCapture();
+      if (!isListening) {
+        startAudioCapture();
+      }
       sendResponse({ status: "ok" });
     }
 
