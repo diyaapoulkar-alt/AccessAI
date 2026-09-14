@@ -208,11 +208,37 @@
     }
   }
 
+  let whisperWs = null;
+
+  function connectWhisperBackend() {
+    try {
+      whisperWs = new WebSocket("ws://localhost:8000/ws/transcribe");
+      whisperWs.onopen = () => {
+        console.log("[AccessAI Extension] Connected to Whisper WebSocket Backend at ws://localhost:8000/ws/transcribe");
+      };
+      whisperWs.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.text) {
+            currentSubtitleText = data.text;
+            if (data.speaker) currentSpeaker = data.speaker;
+            renderTaskbarContent();
+          }
+        } catch (e) {}
+      };
+      whisperWs.onerror = (e) => console.warn("Whisper WS notice:", e);
+    } catch (e) {
+      console.warn("Could not open WebSocket to localhost:8000:", e);
+    }
+  }
+
   async function startAudioCapture() {
     isListening = true;
     createBottomTaskbarUI();
-    currentSubtitleText = "Listening for audio from shared website... Subtitles active.";
+    currentSubtitleText = "Connecting to Whisper AI Backend (http://localhost:8000/transcribe)...";
     renderTaskbarContent();
+
+    connectWhisperBackend();
 
     // Broadcast to background service worker to attach yellow taskbar to ALL open tabs
     try {
