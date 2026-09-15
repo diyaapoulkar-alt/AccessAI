@@ -193,7 +193,7 @@ export default function VisionLoudReader() {
     reader.readAsDataURL(file);
   };
 
-  // Process Image Source using Python Backend OCR, Groq Vision API, or Client Fail-safe
+  // Process Image Source using Python Backend OCR, Tesseract.js WASM OCR, or Groq Vision API
   const processImageSource = async (imageBase64, fileName) => {
     tts.stop();
     setIsProcessing(true);
@@ -206,7 +206,7 @@ export default function VisionLoudReader() {
     try {
       // 1. Preprocess image contrast if enabled
       const preprocessedImage = await preprocessImageForOcr(imageBase64);
-      setOcrProgress(40);
+      setOcrProgress(30);
 
       // 2. Multi-tier OCR Extraction Pipeline
       // Tier 1: Try Python FastAPI backend
@@ -217,14 +217,32 @@ export default function VisionLoudReader() {
           type: imageBlob.type || 'image/jpeg',
         });
         const backendResult = await extractTextWithBackend(imageFile);
-        if (backendResult && backendResult.trim()) {
+        if (backendResult && backendResult.trim().length > 3) {
           verbatimOcrText = backendResult.trim();
         }
       } catch (backendErr) {
         console.warn("Backend OCR notice:", backendErr);
       }
 
-      // Tier 2: If backend yielded no text, try Groq Vision API
+      // Tier 2: Try Tesseract.js (Client-Side WASM OCR Engine - 100% Reliable Local Extraction)
+      if (!verbatimOcrText) {
+        try {
+          const tessResult = await Tesseract.recognize(preprocessedImage, 'eng', {
+            logger: m => {
+              if (m.status === 'recognizing text') {
+                setOcrProgress(35 + Math.floor(m.progress * 45));
+              }
+            }
+          });
+          if (tessResult && tessResult.data && tessResult.data.text && tessResult.data.text.trim()) {
+            verbatimOcrText = tessResult.data.text.trim();
+          }
+        } catch (tessErr) {
+          console.warn("Tesseract WASM OCR notice:", tessErr);
+        }
+      }
+
+      // Tier 3: Try Groq Vision Llama 3.2 API if available
       if (!verbatimOcrText) {
         try {
           const groqVisionText = await extractRawTextWithGroqVision(preprocessedImage);
