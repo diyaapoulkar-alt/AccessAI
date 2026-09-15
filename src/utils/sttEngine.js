@@ -33,6 +33,12 @@ class STTEngine {
         this.recognition.lang = 'en-US';
 
         this.recognition.onresult = (event) => {
+          // Immediately stop fake simulated stream if real microphone speech is detected
+          if (this.simulatedTimer) {
+            clearInterval(this.simulatedTimer);
+            this.simulatedTimer = null;
+          }
+
           let interimTranscript = '';
           let finalTranscript = '';
 
@@ -85,6 +91,7 @@ class STTEngine {
             return; // Non-fatal silence/network errors
           }
           if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+            this.useSimulation = true;
             this.startSimulatedStream();
           }
         };
@@ -97,18 +104,6 @@ class STTEngine {
     this.isListening = true;
     if (onTranscript) this.subscribe(onTranscript);
 
-    // Emit initial caption immediately so taskbar is never blank/static
-    const initialSpeaker = this.speakers[0];
-    this.notifyListeners({
-      id: Date.now(),
-      speaker: initialSpeaker.name,
-      speakerAvatar: initialSpeaker.avatar,
-      speakerColor: initialSpeaker.color,
-      text: this.simulatedPhrases[0],
-      isFinal: true,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-    });
-
     if (options.useSimulation || !this.recognition) {
       this.useSimulation = true;
       this.startSimulatedStream();
@@ -117,10 +112,9 @@ class STTEngine {
       try {
         this.recognition.start();
       } catch (e) {
-        // Fallback to simulated stream if WebSpeech fails
+        this.useSimulation = true;
+        this.startSimulatedStream();
       }
-      // Always start fallback stream in background so taskbar updates even during silence
-      this.startSimulatedStream();
     }
   }
 

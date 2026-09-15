@@ -398,12 +398,17 @@ reader.readAsDataURL(event.data);
       recognition.lang = "en-US";
 
       recognition.onresult = (event) => {
+        if (captionRotationTimer) {
+          clearInterval(captionRotationTimer);
+          captionRotationTimer = null;
+        }
         let transcript = "";
         for (let i = event.resultIndex; i < event.results.length; i++) {
           transcript += event.results[i][0].transcript;
         }
 
         if (transcript.trim()) {
+          currentSpeaker = "You (Microphone)";
           currentSubtitleText = transcript.trim();
           renderTaskbarContent();
         }
