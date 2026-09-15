@@ -5,13 +5,6 @@ export default function CinematicIntro({ onComplete }) {
   const [stage, setStage] = useState('entering'); // entering -> visible -> exiting -> hidden
 
   useEffect(() => {
-    // Check if intro has already been shown in this session
-    const hasSeenIntro = sessionStorage.getItem('accessai_intro_seen');
-    if (hasSeenIntro) {
-      if (onComplete) onComplete();
-      return;
-    }
-
     const timer1 = setTimeout(() => {
       setStage('visible');
     }, 100);
@@ -28,7 +21,6 @@ export default function CinematicIntro({ onComplete }) {
 
   const handleClose = () => {
     setStage('exiting');
-    sessionStorage.setItem('accessai_intro_seen', 'true');
     setTimeout(() => {
       setStage('hidden');
       if (onComplete) onComplete();

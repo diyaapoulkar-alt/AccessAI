@@ -1,43 +1,45 @@
 # AccessAI ♿🤖
 
-> **Next-Generation AI Web Accessibility Scanner & Real-Time Inclusive Meeting Platform**
+> **Next-Generation AI Web Accessibility Suite, WASM OCR Vision Reader & Real-Time Inclusive Subtitle Platform**
 
 [![React](https://img.shields.io/badge/React-18.x-61DAFB?style=flat-square&logo=react)](https://react.dev/)
-[![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?style=flat-square&logo=vite)](https://vitejs.dev/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.x-38BDF8?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
+[![Vite](https://img.shields.io/badge/Vite-8.x-646CFF?style=flat-square&logo=vite)](https://vitejs.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.x-38BDF8?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
+[![WebAssembly](https://img.shields.io/badge/WebAssembly-Tesseract.js-654FF0?style=flat-square&logo=webassembly)](https://tesseract.projectnaptha.com/)
 [![WCAG](https://img.shields.io/badge/WCAG-2.1%2F2.2%20AA-emerald?style=flat-square)](https://www.w3.org/WAI/standards-guidelines/wcag/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 
-AccessAI is an AI-powered web accessibility platform that evaluates whether accessibility fixes are **meaningful and usable** for people with disabilities, going beyond traditional rule-based checkers that only verify syntax presence.
-
-It pairs an **AI Web Accessibility Scanner** with a **Vision AI Loud Reader** for blind users and a **Zero-Install Real-Time Accessible Meeting Tool** for deaf users with live Whisper speech transcription.
+AccessAI is an end-to-end AI-powered web accessibility platform and browser extension ecosystem designed to bridge accessibility barriers for blind/visually impaired, deaf/hard-of-hearing, and color-blind or dyslexic users. It evaluates whether web elements are **meaningful, usable, and compliant** with **WCAG 2.1/2.2 AA standards**.
 
 ---
 
 ## 🌟 Key Features & Modules
 
-### 1. ⚡ AI Web Accessibility Scanner & Evaluator
-* **Contextual Alt-Text Evaluation**: Distinguishes generic attributes (`alt="photo.jpg"`) from meaningful descriptions, flagging useless tags and generating semantic alternatives.
-* **Color Vision Deficiency Simulator**: Live UI filter simulation for **Deuteranopia**, **Protanopia**, **Tritanopia**, and **Achromatopsia**.
-* **WCAG AA/AAA Contrast Ratio Calculator**: Calculates contrast ratios against 4.5:1 and 7.0:1 thresholds with automated high-contrast palette suggestions.
-* **DOM Heading Structure Inspector**: Visualizes outline hierarchy (H1 -> H2 -> H3) and alerts developers to skipped heading levels.
-* **Side-by-Side Code Remediation**: Shows original code alongside AI-remediated accessible code with 1-click copy.
+### 1. 👁️ Vision AI OCR Loud Reader (Blind & Low-Vision UX)
+* **Multi-Tiered Fail-Safe OCR Pipeline**:
+  1. **Tier 1**: Local Python FastAPI OCR Backend (`/ocr`).
+  2. **Tier 2**: **Tesseract.js WebAssembly (WASM)** client-side engine (decodes uncompressed image blobs locally in the browser with 100% offline reliability).
+  3. **Tier 3**: **Llama 3.2 11B Vision** AI model.
+* **Natural Speech Synthesis (TTS)**: Built-in Web Speech Synthesis engine with **250ms sentence breathing pauses**, abbreviation normalization (e.g. converting `1.Def:` → `"Point 1. Definition:"`), taskbar noise filtering, rate controls, and canvas audio waveform visualizers.
 
-### 2. 👁️ Vision AI Loud Reader & Audio Explainer (For Blind & Low-Vision Users)
-* **Multi-Source Image Input**: Drag-and-drop file upload, camera snapshot, or pre-loaded test samples (medical prescriptions, utility bills, street signs, invoices).
-* **AI OCR & Context Synthesizer**: Extracts text and synthesizes plain-language explanations of complex visual layouts.
-* **Loud Text-to-Speech (TTS) Reader**: Built-in speech synthesis with rate controls (0.75x–2.0x), voice accent picker, HTML5 canvas audio wave animation, and transcript viewer.
+### 2. 🎙️ Chrome Extension & Google Meet Live Subtitles (Deaf & Hard-of-Hearing UX)
+* **Manifest V3 Extension Architecture**: Built with background service workers, content script DOM injection (`content.js`), floating drawer widget dock (`MeetExtensionWidget.jsx`), and yellow subtitle taskbar overlay.
+* **Live Speech-to-Text (STT) & Diarization**: Real-time continuous speech transcription with speaker diarization (`You (Microphone)`, `Host`, `Presenter`), continuous auto-reconnection loop, and live mic override priority over simulation.
+* **Deaf-Inclusive UI Controls**: High-contrast Yellow-on-Black overlay taskbar, OpenDyslexic typography support, scalable caption typography, and 1-click clean DOM node purging (`✕ Close`).
 
-### 3. 🎙️ Real-Time Accessible Meeting Tool (For Deaf & Hard-of-Hearing Users)
-* **Live Speech-to-Text Transcriber**: Continuous live captions powered by Web Speech API and simulated OpenAI Whisper engine stream.
-* **Zero-Install / 100% Web-Based**: Runs in any browser link (Chrome, Safari, Edge, Firefox, iOS/Android) without installing heavy desktop apps.
-* **Deaf-Inclusive UI Controls**: High-contrast Yellow-on-Black overlay mode, OpenDyslexic font support, scalable caption typography (16px to 32px), and speaker diarization.
-* **Live AI Meeting Summary**: Auto-generates real-time meeting notes and key takeaways during speech.
+### 3. 🎨 Color Vision Deficiency (CVD) Simulator
+* **Live Vision Matrix Simulation**: Real-time matrix color transformation filters simulating **Deuteranopia**, **Protanopia**, **Tritanopia**, and **Achromatopsia** using Brettel and Machado matrix algorithms.
 
-### 4. 🛠️ Developer API & Extension Sandbox
-* **Simulated Browser Extension Overlay**: Floating widget overlay to inspect target DOM elements on live mock pages.
-* **Interactive REST & WebSocket API Sandbox**: Playground for testing `/api/v1/scan/url`, `/api/v1/vision/read-explain`, and `wss://stream.accessai.io/v1/meetings/transcribe` with cURL & Node.js SDK code snippets.
-* **Compliance Audit Exporter**: Generates exportable WCAG 2.1/2.2 AA PDF, HTML, and JSON audit reports.
+### 4. 🛡️ WCAG 2.1/2.2 AA Contrast & Palette Generator
+* **Compliance Luminance Engine**: Calculates relative contrast ratios against 4.5:1 (AA) and 7.0:1 (AAA) thresholds using piecewise sRGB companding and alpha compositing, with automated HSL compliant palette generation.
+
+### 5. 🔍 AI Alt-Text Evaluator & DOM Inspector
+* **Contextual Image Alt-Text Review**: Evaluates alt-text quality, flags generic attributes (`alt="photo.jpg"`), and generates semantic alt-text using Llama 3.3 70B.
+* **In-Page DOM Inspector**: Inspects target DOM elements for missing accessibility attributes, unlabeled controls, and skipped heading levels.
+
+### 6. ⚡ REST & WebSocket API Gateway Sandbox
+* **Interactive API Playground**: Developer sandbox for testing endpoints `/api/v1/vision/read-explain`, `/api/v1/scan/url`, `/ocr`, and real-time audio WebSocket streams with cURL and JavaScript code snippets.
+* **Compliance Audit Exporter**: Generates exportable WCAG 2.1/2.2 AA audit reports in PDF, HTML, and JSON formats.
 
 ---
 
@@ -45,58 +47,89 @@ It pairs an **AI Web Accessibility Scanner** with a **Vision AI Loud Reader** fo
 
 ```mermaid
 graph TD
-    subgraph Client Layer
-        A[Browser Extension Inspector]
-        B[Web Scanner Dashboard]
-        C[Vision Loud Reader for Blind Users]
-        D[Accessible Meeting Subtitle View]
+    subgraph Client & UI Layer
+        A[Cinematic Intro & Web App Dashboard]
+        B[Manifest V3 Extension & Content Script Injector]
+        C[Vision AI Loud Reader for Blind Users]
+        D[Yellow Subtitle Taskbar Overlay]
     end
 
-    subgraph Gateway & Protocol Layer
-        E[REST API Gateway /api/v1]
-        F[WebSocket Stream Manager wss://]
-        G[Auth Token & Rate Limiter]
+    subgraph Core Processing Engines
+        E[Tesseract.js WASM Local OCR Engine]
+        F[Web Speech Synthesis TTS Engine]
+        G[Web Speech Recognition STT Engine]
+        H[CVD Matrix Transform & WCAG Contrast Engine]
     end
 
-    subgraph AI Processing Core
-        H[Alt-Text AI Semantic Evaluator]
-        I[Vision OCR & Text Synthesizer]
-        J[Whisper Speech-to-Text Model]
-        K[WCAG Contrast Calculator & Simulator]
+    subgraph API & Backend Gateway Layer
+        I[Python 3.11 FastAPI Backend /ocr]
+        J[WebSocket Real-Time Audio Transcribe Stream]
+        K[Groq AI Gateway - Llama 3.2 Vision & Llama 3.3 70B]
     end
 
-    subgraph Output Stream Layer
-        L[Loud TTS Audio Stream]
-        M[High-Contrast Subtitle Stream]
-        N[Side-by-Side Code Fixes Diff]
-        O[Exportable WCAG AA Audit PDF Reports]
-    end
-
-    A & B & C & D --> E & F
-    E & F --> G
-    G --> H & I & J & K
-    H & I & J & K --> L & M & N & O
+    A & B & C & D --> E & F & G & H
+    E & F & G & H --> I & J & K
 ```
 
 ---
+
+## 💻 Tech Stack & Frameworks
+
+| Domain | Framework / Library | Role |
+| :--- | :--- | :--- |
+| **Frontend UI** | **React 18, Vite 8, Tailwind CSS** | Fast Single Page Application (SPA), warm brown/porcelain white luxury theme, custom keyframe animations |
+| **Browser Extension** | **Chrome Extension Manifest V3** | Service worker (`background.js`), DOM content script injection (`content.js`), floating drawer widget |
+| **Client WASM Engine**| **Tesseract.js (WebAssembly)** | Local browser WASM OCR text extraction from image Blobs |
+| **AI Vision & LLM** | **Llama 3.2 11B Vision & Llama 3.3 70B** | Multilingual text simplification and visual scene description via Groq API |
+| **Audio Synthesis** | **Web Speech API (TTS & STT)** | Natural SpeechSynthesis with sentence pause cadence and SpeechRecognition STT |
+| **Backend Service** | **Python 3.11, FastAPI, Uvicorn** | REST API endpoints (`/ocr`, `/evaluate-alt-text`, `/transcribe`) |
+| **Icons & Typography**| **Lucide Icons, Plus Jakarta Sans, Atkinson Hyperlegible** | Accessible iconography and dyslexic-friendly typography |
+
 ---
 
-## 👥 Team & Contributions
+## 👥 Team & Individual Technical Contributions
 
 | S.No. | Member Name | Registration No. | Project Role | Major Technical Contribution |
 | :---: | :--- | :--- | :--- | :--- |
-| **1** | **Diya Annasaheb Poulkar** | **25BCE11424** | **Real-Time Audio & AI Systems Architect** | Vision AI Loud Reader (OCR + TTS), Whisper speech-to-text live meeting tool, REST & WebSocket API Gateway. |
-| **2** | **Diya Payal** | **25BCE11416** | **Accessibility & AI Engine Specialist** | AI alt-text context evaluator, Vision OCR engine for documents/signs, AI prompt templates. |
-| **3** | **Eshaan Dogra** | **25BCE10675** | **UX/UI & Compliance Specialist** | Color Vision Deficiency Simulator, WCAG AA/AAA contrast calculator, High-Contrast Yellow/Black & OpenDyslexic UI modes. |
-| **4** | **Ayushi Gupta** | **25BCE11169** | **AI Vision & Speech Synthesis Developer** | Core React 18 / Vite app layout, Chrome Extension simulator widget, split-screen meeting view & audio visualizer canvas. |
-| **5** | **Kunwar Singh** | **25BCE11021** | **Integration / Testing Developer** | Developer REST & WebSocket API Sandbox, Chrome Extension simulator widget, downloadable PDF/JSON report exporters. |
+| **1** | **Diya Annasaheb Poulkar** | **25BCE11424** | **Real-Time Audio & AI Systems Architect** | Designed & built the entire React + Vite UI layout, white & warm brown aesthetic, and site opening intro animation (with custom geometric A logo); architected the Chrome Extension (Manifest V3, background service worker, content script DOM injection, floating drawer widget, and yellow subtitle taskbar UI); built the Vision AI Loud Reader OCR & TTS engine (Tesseract.js WASM + Llama 3.2 Vision fallback, abbreviation normalization like `1.Def:` → `"Point 1. Definition:"`, and 250ms sentence pauses); built the `sttEngine.js` continuous STT speech recognition & diarization engine. |
+| **2** | **Diya Payal** | **25BCE11416** | **Accessibility & AI Engine Specialist** | AI alt-text context evaluator, Vision OCR prompt templates, document AI context explainer. |
+| **3** | **Eshaan Dogra** | **25BCE10675** | **UX/UI & Compliance Specialist** | Color Vision Deficiency Simulator (Deuteranopia, Protanopia, Tritanopia, Achromatopsia matrices), WCAG AA/AAA contrast calculator, High-Contrast Yellow/Black & OpenDyslexic UI modes. |
+| **4** | **Ayushi Gupta** | **25BCE11169** | **AI Vision & Speech Synthesis Developer** | Backend WebSocket stream handler connection for real-time audio transcription, split-screen meeting view & audio visualizer canvas integration. |
+| **5** | **Kunwar Singh** | **25BCE11021** | **Integration / Testing Developer** | Developer REST & WebSocket API Gateway Sandbox, compliance audit PDF/JSON report exporters. |
+
+---
+
+## 🚀 Installation & Local Setup
+
+### Prerequisites
+* **Node.js**: v18.x or higher
+* **npm**: v9.x or higher
+* **Python**: v3.11+ (optional for backend endpoints)
+
+### 1. Clone & Install Dependencies
+```bash
+git clone https://github.com/diyaapoulkar-alt/AccessAI.git
+cd AccessAI
+npm install
+```
+
+### 2. Start Development Server
+```bash
+npm run dev
+```
+Open [http://localhost:5178/](http://localhost:5178/) in your browser.
+
+### 3. Load Chrome Extension
+1. Open Chrome and navigate to `chrome://extensions/`.
+2. Enable **Developer Mode** (top-right toggle).
+3. Click **Load Unpacked** and select `public/extension` (or `dist/extension`).
 
 ---
 
 ## 📜 Standards & References
 * [W3C Web Content Accessibility Guidelines (WCAG 2.1 & 2.2)](https://www.w3.org/TR/WCAG21/)
 * [W3C Web Speech API Specification](https://w3c.github.io/speech-api/)
-* [OpenAI Whisper Paper (Radford et al.)](https://arxiv.org/abs/2212.04356)
+* [Tesseract.js WebAssembly OCR Engine](https://tesseract.projectnaptha.com/)
 * [Chrome DevTools Accessibility Auditing Guidelines](https://developer.chrome.com/docs/devtools/accessibility/)
 
 ---
