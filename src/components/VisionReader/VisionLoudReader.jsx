@@ -204,17 +204,15 @@ export default function VisionLoudReader() {
     let plainExplanation = '';
 
     try {
-      // 1. Preprocess image contrast if enabled
-      const preprocessedImage = await preprocessImageForOcr(imageBase64);
       setOcrProgress(30);
 
-      // 2. Multi-tier OCR Extraction Pipeline
-      // Tier 1: Try Python FastAPI backend
+      // 1. Multi-tier OCR Extraction Pipeline
+      // Tier 1: Try Python FastAPI backend with raw uncompressed image
       try {
-        const imageResponse = await fetch(preprocessedImage);
+        const imageResponse = await fetch(imageBase64);
         const imageBlob = await imageResponse.blob();
         const imageFile = new File([imageBlob], fileName || 'image.jpg', {
-          type: imageBlob.type || 'image/jpeg',
+          type: imageBlob.type || 'image/png',
         });
         const backendResult = await extractTextWithBackend(imageFile);
         if (backendResult && backendResult.trim().length > 3) {
@@ -224,10 +222,10 @@ export default function VisionLoudReader() {
         console.warn("Backend OCR notice:", backendErr);
       }
 
-      // Tier 2: Try Tesseract.js (Client-Side WASM OCR Engine with Image Blob)
+      // Tier 2: Try Tesseract.js (Client-Side WASM OCR Engine on Raw Image Blob)
       if (!verbatimOcrText) {
         try {
-          const imgRes = await fetch(preprocessedImage);
+          const imgRes = await fetch(imageBase64);
           const imgBlob = await imgRes.blob();
 
           const tessResult = await Tesseract.recognize(imgBlob, 'eng', {
@@ -241,26 +239,30 @@ export default function VisionLoudReader() {
             verbatimOcrText = tessResult.data.text.trim();
           }
         } catch (tessErr) {
-          console.warn("Tesseract WASM OCR notice:", tessErr);
-          try {
-            const worker = await Tesseract.createWorker('eng');
-            const imgRes = await fetch(preprocessedImage);
-            const imgBlob = await imgRes.blob();
-            const ret = await worker.recognize(imgBlob);
-            if (ret && ret.data && ret.data.text && ret.data.text.trim()) {
-              verbatimOcrText = ret.data.text.trim();
-            }
-            await worker.terminate();
-          } catch (workerErr) {
-            console.warn("Tesseract worker fallback notice:", workerErr);
-          }
+          console.warn("Tesseract WASM OCR notice on raw image:", tessErr);
         }
       }
 
-      // Tier 3: Try Groq Vision Llama 3.2 API if available
+      // Tier 3: Try Tesseract.js on Contrast-Enhanced Image if raw image yielded no text
       if (!verbatimOcrText) {
         try {
-          const groqVisionText = await extractRawTextWithGroqVision(preprocessedImage);
+          const preprocessedImage = await preprocessImageForOcr(imageBase64);
+          const imgRes = await fetch(preprocessedImage);
+          const imgBlob = await imgRes.blob();
+
+          const tessResult = await Tesseract.recognize(imgBlob, 'eng');
+          if (tessResult && tessResult.data && tessResult.data.text && tessResult.data.text.trim()) {
+            verbatimOcrText = tessResult.data.text.trim();
+          }
+        } catch (e) {
+          console.warn("Tesseract contrast pass notice:", e);
+        }
+      }
+
+      // Tier 4: Try Groq Vision Llama 3.2 API if available
+      if (!verbatimOcrText) {
+        try {
+          const groqVisionText = await extractRawTextWithGroqVision(imageBase64);
           if (groqVisionText && groqVisionText.trim()) {
             verbatimOcrText = groqVisionText.trim();
           }
