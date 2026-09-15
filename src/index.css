@@ -109,3 +109,46 @@ body {
   border-radius: 6px !important;
 }
 
+/* Custom Floating & Smooth Reveal Animations */
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(1deg); }
+}
+
+@keyframes floatReverse {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(12px) rotate(-1deg); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+.animate-float-slow {
+  animation: floatSlow 6s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+  animation: floatReverse 7s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
+/* White and Warm Brown Luxury Card Styles */
+.brown-theme-card {
+  background: #FFFFFF;
+  border: 1px solid rgba(217, 119, 6, 0.15);
+  box-shadow: 0 10px 30px -5px rgba(120, 53, 15, 0.04), 0 4px 6px -2px rgba(120, 53, 15, 0.02);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.brown-theme-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  border-color: rgba(217, 119, 6, 0.4);
+  box-shadow: 0 25px 50px -12px rgba(120, 53, 15, 0.12), 0 0 20px rgba(251, 191, 36, 0.15);
+}
+
+
