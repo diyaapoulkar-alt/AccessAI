@@ -110,7 +110,7 @@ export default function MeetExtensionWidget() {
     <>
       {/* Full Bottom Yellow Subtitle Taskbar (Triggered when Open Extension is clicked) */}
       {showYellowTaskbar && (
-        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 w-[94%] max-w-[1020px] z-[99999] font-sans animate-in slide-in-from-bottom duration-300 select-none">
+        <div id="accessai-meet-taskbar-react" className="fixed bottom-5 left-1/2 -translate-x-1/2 w-[94%] max-w-[1020px] z-[99999] font-sans animate-in slide-in-from-bottom duration-300 select-none">
           <div className="bg-black border-4 border-yellow-400 rounded-2xl p-3.5 color-white shadow-[0_20px_40px_rgba(0,0,0,0.9),0_0_30px_rgba(250,204,21,0.4)]">
             <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/20">
               <div className="flex items-center gap-2.5 flex-wrap">
@@ -138,10 +138,10 @@ export default function MeetExtensionWidget() {
                     setShowYellowTaskbar(false);
                     stt.stopListening();
                     setIsListening(false);
-                    const existing = document.getElementById("accessai-meet-taskbar");
-                    if (existing) {
-                      try { existing.remove(); } catch (err) {}
-                    }
+                    const taskbars = document.querySelectorAll("[id*='accessai-meet-taskbar']");
+                    taskbars.forEach(tb => {
+                      try { tb.remove(); } catch (err) {}
+                    });
                   }}
                   className="bg-rose-950/80 hover:bg-rose-900 text-rose-200 border border-rose-600 rounded-xl px-2.5 py-1 text-xs font-bold transition hover:scale-105 cursor-pointer"
                   title="Close Subtitle Taskbar"

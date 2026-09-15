@@ -23,7 +23,9 @@
   const siteCaptions = [
     "Welcome to the shared meeting session. AccessAI live audio analyzer is active.",
     "Real-time audio stream detected from shared website. Transcribing speech under 80ms latency.",
-    "Active speaker diarization and high-contrast Yellow-on-Black subtitles are active.",
+    "Active speaker diarization and high-contrast Yellow-on-Black subtitles are active."
+  ];
+
   // Ensure any existing taskbar from prior injection is cleaned up on script load
   const initialOldTaskbar = document.getElementById("accessai-meet-taskbar");
   if (initialOldTaskbar) {
