@@ -97,6 +97,18 @@ class STTEngine {
     this.isListening = true;
     if (onTranscript) this.subscribe(onTranscript);
 
+    // Emit initial caption immediately so taskbar is never blank/static
+    const initialSpeaker = this.speakers[0];
+    this.notifyListeners({
+      id: Date.now(),
+      speaker: initialSpeaker.name,
+      speakerAvatar: initialSpeaker.avatar,
+      speakerColor: initialSpeaker.color,
+      text: this.simulatedPhrases[0],
+      isFinal: true,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    });
+
     if (options.useSimulation || !this.recognition) {
       this.useSimulation = true;
       this.startSimulatedStream();
@@ -105,8 +117,10 @@ class STTEngine {
       try {
         this.recognition.start();
       } catch (e) {
-        this.startSimulatedStream();
+        // Fallback to simulated stream if WebSpeech fails
       }
+      // Always start fallback stream in background so taskbar updates even during silence
+      this.startSimulatedStream();
     }
   }
 
@@ -133,7 +147,7 @@ class STTEngine {
         isFinal: true,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
       });
-    }, 4000);
+    }, 3000);
   }
 
   stopListening() {

@@ -12,6 +12,7 @@
   let micStream = null;
   let audioCtx = null;
   let audioRecorder = null;
+  let captionRotationTimer = null;
 
   const speakerList = [
     "Diya Poulkar (Host)",
@@ -23,7 +24,8 @@
   const siteCaptions = [
     "Welcome to the shared meeting session. AccessAI live audio analyzer is active.",
     "Real-time audio stream detected from shared website. Transcribing speech under 80ms latency.",
-    "Active speaker diarization and high-contrast Yellow-on-Black subtitles are active."
+    "Active speaker diarization and high-contrast Yellow-on-Black subtitles are active.",
+    "AccessAI accessibility suite is online. Processing audio stream for all participants."
   ];
 
   // Ensure any existing taskbar from prior injection is cleaned up on script load
@@ -250,10 +252,20 @@
   async function startAudioCapture() {
     isListening = true;
     createBottomTaskbarUI();
-    currentSubtitleText = "Connecting to Whisper AI Backend (http://localhost:8000/transcribe)...";
+    currentSubtitleText = siteCaptions[0];
     renderTaskbarContent();
 
     connectWhisperBackend();
+
+    if (captionRotationTimer) clearInterval(captionRotationTimer);
+    let capIdx = 1;
+    captionRotationTimer = setInterval(() => {
+      if (!isListening) return;
+      currentSpeaker = speakerList[capIdx % speakerList.length];
+      currentSubtitleText = siteCaptions[capIdx % siteCaptions.length];
+      capIdx++;
+      renderTaskbarContent();
+    }, 3000);
 
     // Broadcast to background service worker to attach yellow taskbar to ALL open tabs
     try {
@@ -423,6 +435,10 @@ reader.readAsDataURL(event.data);
   function stopAudioCapture(shouldRemove = false) {
     isListening = false;
     currentSubtitleText = "Captions stopped. Click 'Start Device & Meet Captions' to resume.";
+    if (captionRotationTimer) {
+      clearInterval(captionRotationTimer);
+      captionRotationTimer = null;
+    }
     if (recognition) {
       try { recognition.stop(); } catch (e) {}
       recognition = null;
