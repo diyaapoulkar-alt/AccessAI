@@ -4,14 +4,16 @@
   "version": "1.0.0",
   "description": "Real-time Google Meet live captions, speaker diarization, high contrast subtitles & audio analyzer.",
   "permissions": [
-    "activeTab",
-    "storage",
-    "scripting"
-  ],
+  "activeTab",
+  "storage",
+  "scripting",
+  "tabCapture"
+],
   "host_permissions": [
-    "*://meet.google.com/*",
-    "<all_urls>"
-  ],
+  "*://meet.google.com/*",
+  "<all_urls>",
+  "http://127.0.0.1:8000/*"
+],
   "background": {
     "service_worker": "background.js"
   },
