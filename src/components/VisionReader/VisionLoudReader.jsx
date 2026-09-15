@@ -19,8 +19,9 @@ import {
   Zap,
   FileSearch
 } from 'lucide-react';
+import Tesseract from 'tesseract.js';
 import { tts } from '../../utils/ttsEngine';
-import { simplifyTextWithGroq, getGroqApiKey } from '../../services/groqApi';
+import { simplifyTextWithGroq, extractRawTextWithGroqVision, getGroqApiKey } from '../../services/groqApi';
 import { extractTextWithBackend } from '../../services/accessibilityApi';
 import ApiKeyModal from '../ApiKeyModal';
 
