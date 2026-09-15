@@ -224,10 +224,13 @@ export default function VisionLoudReader() {
         console.warn("Backend OCR notice:", backendErr);
       }
 
-      // Tier 2: Try Tesseract.js (Client-Side WASM OCR Engine - 100% Reliable Local Extraction)
+      // Tier 2: Try Tesseract.js (Client-Side WASM OCR Engine with Image Blob)
       if (!verbatimOcrText) {
         try {
-          const tessResult = await Tesseract.recognize(preprocessedImage, 'eng', {
+          const imgRes = await fetch(preprocessedImage);
+          const imgBlob = await imgRes.blob();
+
+          const tessResult = await Tesseract.recognize(imgBlob, 'eng', {
             logger: m => {
               if (m.status === 'recognizing text') {
                 setOcrProgress(35 + Math.floor(m.progress * 45));
@@ -239,6 +242,18 @@ export default function VisionLoudReader() {
           }
         } catch (tessErr) {
           console.warn("Tesseract WASM OCR notice:", tessErr);
+          try {
+            const worker = await Tesseract.createWorker('eng');
+            const imgRes = await fetch(preprocessedImage);
+            const imgBlob = await imgRes.blob();
+            const ret = await worker.recognize(imgBlob);
+            if (ret && ret.data && ret.data.text && ret.data.text.trim()) {
+              verbatimOcrText = ret.data.text.trim();
+            }
+            await worker.terminate();
+          } catch (workerErr) {
+            console.warn("Tesseract worker fallback notice:", workerErr);
+          }
         }
       }
 
@@ -254,11 +269,11 @@ export default function VisionLoudReader() {
         }
       }
 
-      setOcrProgress(70);
+      setOcrProgress(75);
 
-      // Tier 3: If still no text, provide helpful message
+      // Tier 4: If no text detected in image
       if (!verbatimOcrText) {
-        verbatimOcrText = `[Extracted Text from ${fileName || 'uploaded image'}]:\nDocument processed successfully. OCR text extraction active.`;
+        verbatimOcrText = `No readable text found in ${fileName || 'uploaded image'}. Please upload a clear document photo, prescription label, or text sign.`;
       }
 
       // Generate AI explanation / simplification if Groq key available
