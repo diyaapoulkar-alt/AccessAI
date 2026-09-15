@@ -56,13 +56,41 @@ class TTSEngine {
     return processed;
   }
 
+  formatTextForNaturalSpeech(text) {
+    if (!text) return '';
+
+    let processed = text;
+
+    // 1. Filter out OS taskbar/browser chrome OCR noise (e.g. 285°C, Monty dowdy, WO ypeheetosarch, etc.)
+    processed = processed.replace(/(?:WO\s+ypeheetosarch|HOO\s+@|285°C|Monty\s+dowdy|Ema\)\s+ove\s+U%).*/gi, '');
+
+    // 2. Expand abbreviations like "1.Def:" -> "Point 1. Definition: "
+    processed = processed.replace(/\b(\d+)\s*\.\s*Def\s*:/gi, 'Point $1. Definition: ');
+    processed = processed.replace(/\bDef\s*:/gi, 'Definition: ');
+
+    // 3. Normalize numbered list items like "1.Class" -> "Point 1. Class"
+    processed = processed.replace(/(\d+)\s*\.\s*([A-Za-z])/g, 'Point $1. $2');
+
+    // 4. Format chemical formulas (CH4, H2O)
+    processed = this.formatChemicalFormulas(processed);
+
+    // 5. Replace colon markers with natural pause indicator
+    processed = processed.replace(/\s*:\s*/g, '. ');
+
+    // 6. Preserve linebreaks by converting newlines into explicit sentence pauses
+    processed = processed.replace(/\r?\n+/g, '. \n');
+
+    return processed;
+  }
+
   splitIntoChunks(text) {
     if (!text) return [];
-    // Pre-format chemical formulas so speech synthesis pronounces numbers clearly
-    const expandedText = this.formatChemicalFormulas(text);
+    
+    // Format text for natural pronunciation and speech cadence
+    const formattedText = this.formatTextForNaturalSpeech(text);
 
-    // Remove markdown symbols (*, #, _, `, ~)
-    const cleanText = expandedText.replace(/[*#_`~]/g, ' ').replace(/\s+/g, ' ').trim();
+    // Remove raw markdown symbols (*, #, _, `, ~)
+    const cleanText = formattedText.replace(/[*#_`~]/g, ' ').replace(/[ \t]+/g, ' ').trim();
     if (!cleanText) return [];
 
     // Split by sentence terminators (. ! ? ; \n) or linebreaks
@@ -73,9 +101,12 @@ class TTSEngine {
       sentence = sentence.trim();
       if (!sentence) continue;
 
-      // If sentence is longer than 150 characters, break by comma or spaces
-      if (sentence.length > 150) {
-        const subParts = sentence.match(/.{1,140}(?:,|\s+|$)/g) || [sentence];
+      // Clean trailing duplicate periods
+      sentence = sentence.replace(/\.+/g, '.').trim();
+
+      // If sentence is longer than 140 characters, break by comma or spaces
+      if (sentence.length > 140) {
+        const subParts = sentence.match(/.{1,130}(?:,|\s+|$)/g) || [sentence];
         for (let sub of subParts) {
           const trimmed = sub.trim();
           if (trimmed) chunks.push(trimmed);
@@ -155,7 +186,7 @@ class TTSEngine {
             if (this.isSpeaking && !this.isPaused) {
               this.speakNextChunk();
             }
-          }, 40);
+          }, 250); // Natural 250ms pause between sentences and line breaks
         } else {
           this.stop();
         }
@@ -171,7 +202,7 @@ class TTSEngine {
             if (this.isSpeaking && !this.isPaused) {
               this.speakNextChunk();
             }
-          }, 40);
+          }, 250);
         } else {
           this.stop();
         }
