@@ -295,18 +295,28 @@ export default function MeetExtensionWidget() {
             </span>
           </div>
 
-          <div className="p-4 border-b border-stone-800 bg-stone-950">
-            <div className={`p-4 rounded-2xl transition-all ${getThemeStyles()}`}>
-              <div className="flex items-center justify-between text-[10px] opacity-80 mb-1 font-mono font-bold">
-                <span>{activeSpeaker}</span>
-                <span className="uppercase">{isListening ? 'Live Subtitle' : 'Captions Off'}</span>
+          {!showYellowTaskbar ? (
+            <div className="p-4 border-b border-stone-800 bg-stone-950/80 text-center">
+              <div className="p-4 rounded-2xl border border-stone-800 bg-stone-900/60 flex flex-col items-center justify-center gap-2">
+                <Sparkles className="w-5 h-5 text-yellow-400" />
+                <span className="text-xs font-bold text-stone-200">Live Captions & Subtitle Taskbar Idle</span>
+                <p className="text-[11px] text-stone-400">Click <strong className="text-yellow-400 font-bold">"Open Extension"</strong> above to launch the live yellow subtitle taskbar.</p>
               </div>
-
-              <p className={`${getSizeStyle()} ${dyslexicFont ? 'dyslexia-font' : ''} leading-snug`}>
-                "{currentText}"
-              </p>
             </div>
-          </div>
+          ) : (
+            <div className="p-4 border-b border-stone-800 bg-stone-950">
+              <div className={`p-4 rounded-2xl transition-all ${getThemeStyles()}`}>
+                <div className="flex items-center justify-between text-[10px] opacity-80 mb-1 font-mono font-bold">
+                  <span>{activeSpeaker}</span>
+                  <span className="uppercase">{isListening ? 'Live Subtitle' : 'Captions Off'}</span>
+                </div>
+
+                <p className={`${getSizeStyle()} ${dyslexicFont ? 'dyslexia-font' : ''} leading-snug`}>
+                  "{currentText}"
+                </p>
+              </div>
+            </div>
+          )}
 
           <div className="bg-stone-900/80 px-4 py-2.5 border-b border-stone-800 flex items-center justify-between text-xs">
             <div className="flex items-center gap-1">
