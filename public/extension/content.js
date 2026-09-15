@@ -14,6 +14,7 @@
   let audioStream = null;
   let micStream = null;
   let audioCtx = null;
+  let audioRecorder = null;
 
   const speakerList = [
     "Diya Poulkar (Host)",
@@ -263,6 +264,7 @@
         const audioTracks = displayStream.getAudioTracks();
         if (audioTracks.length > 0) {
           audioStream = new MediaStream(audioTracks);
+          startWhisperTranscription();
           audioCtx = new (window.AudioContext || window.webkitAudioContext)();
           const source = audioCtx.createMediaStreamSource(audioStream);
           const analyser = audioCtx.createAnalyser();
@@ -289,22 +291,77 @@
 
     startWebSpeech();
 
-    let idx = 0;
-    const intervalId = setInterval(() => {
-      if (!isListening) {
-        clearInterval(intervalId);
-        return;
-      }
-      if (currentSubtitleText.includes("Listening for audio") || currentSubtitleText.includes("Subtitles active")) {
-        currentSpeaker = speakerList[idx % speakerList.length];
-        currentSubtitleText = siteCaptions[idx % siteCaptions.length];
-        idx++;
-        renderTaskbarContent();
-      }
-    }, 4000);
+   
+  }
+async function startWhisperTranscription() {
+  if (!audioStream) {
+    console.warn("No shared audio stream available for Whisper.");
+    return;
   }
 
+  if (!window.MediaRecorder) {
+    console.warn("MediaRecorder is not supported in this browser.");
+    return;
+  }
+
+  try {
+    audioRecorder = new MediaRecorder(audioStream, {
+      mimeType: "audio/webm"
+    });
+
+    audioRecorder.ondataavailable = async (event) => {
+      if (!event.data || event.data.size === 0 || !isListening) {
+        return;
+      }
+
+      try {
+        const formData = new FormData();
+
+        formData.append(
+          "audio",
+          event.data,
+          "shared-audio.webm"
+        );
+
+        const reader = new FileReader();
+
+reader.onloadend = () => {
+  const base64Audio = reader.result.split(",")[1];
+
+  chrome.runtime.sendMessage({
+    action: "TRANSCRIBE_AUDIO",
+    audioBase64: base64Audio
+  }, (result) => {
+    if (chrome.runtime.lastError) {
+      console.warn(
+        "Whisper background request failed:",
+        chrome.runtime.lastError.message
+      );
+      return;
+    }
+
+    if (result && result.text && result.text.trim()) {
+      currentSubtitleText = result.text.trim();
+      renderTaskbarContent();
+    }
+  });
+};
+
+reader.readAsDataURL(event.data);
+      } catch (error) {
+        console.warn("Whisper transcription request failed:", error);
+      }
+    };
+
+    audioRecorder.start(4000);
+
+    console.log("AccessAI Whisper transcription started.");
+  } catch (error) {
+    console.warn("Could not start Whisper recorder:", error);
+  }
+}
   function startWebSpeech() {
+
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) return;
 
@@ -349,6 +406,10 @@
       try { recognition.stop(); } catch (e) {}
       recognition = null;
     }
+    if (audioRecorder) {
+  try { audioRecorder.stop(); } catch (e) {}
+  audioRecorder = null;
+}
     if (audioStream) {
       audioStream.getTracks().forEach(t => t.stop());
       audioStream = null;

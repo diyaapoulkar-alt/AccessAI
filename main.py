@@ -22,6 +22,7 @@ import pytesseract
 from alt_text.evaluator import evaluate_alt_text, get_configured_groq_key
 from alt_text.prompts import PROMPT_TEMPLATES
 from ocr.ocr_engine import TESSERACT_PATH, extract_sign_text, extract_text
+from stt.whisper_engine import transcribe_audio
 
 # Load environment variables
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -126,7 +127,42 @@ async def evaluate_uploaded_alt_text(
     finally:
         temporary_path.unlink(missing_ok=True)
 
+@app.post("/transcribe-audio")
+async def transcribe_uploaded_audio(
+    audio: UploadFile = File(...)
+):
+    """
+    Transcribe a browser-recorded audio chunk using Whisper.
+    """
 
+    suffix = Path(audio.filename or "audio.webm").suffix or ".webm"
+
+    with tempfile.NamedTemporaryFile(
+        delete=False,
+        suffix=suffix
+    ) as temporary_file:
+        shutil.copyfileobj(audio.file, temporary_file)
+        temporary_path = Path(temporary_file.name)
+
+    try:
+        if temporary_path.stat().st_size < 1000:
+            return {"text": "", "source": "whisper"}
+
+        text = transcribe_audio(str(temporary_path))
+
+        return {
+            "text": text,
+            "source": "whisper"
+        }
+
+    except Exception as error:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Whisper transcription failed: {error}"
+        ) from error
+
+    finally:
+        temporary_path.unlink(missing_ok=True)
 @app.post("/ocr")
 async def extract_uploaded_text(
     image: UploadFile = File(...),

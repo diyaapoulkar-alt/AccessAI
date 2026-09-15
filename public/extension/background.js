@@ -40,6 +40,48 @@ async function ensureInjectedAndSend(message, sendResponse) {
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === "TRANSCRIBE_AUDIO") {
+  (async () => {
+    try {
+      const binary = atob(message.audioBase64);
+      const bytes = new Uint8Array(binary.length);
+
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+
+      const audioBlob = new Blob([bytes], { type: "audio/webm" });
+
+      const formData = new FormData();
+      formData.append("audio", audioBlob, "shared-audio.webm");
+
+      const response = await fetch(
+        "http://127.0.0.1:8000/transcribe-audio",
+        {
+          method: "POST",
+          body: formData
+        }
+      );
+
+      const result = await response.json();
+
+      sendResponse({
+        status: "ok",
+        text: result.text || ""
+      });
+    } catch (error) {
+      console.error("Background Whisper request failed:", error);
+
+      sendResponse({
+        status: "error",
+        text: ""
+      });
+    }
+  })();
+
+  return true;
+}
+
   if (message.action === "BROADCAST_YELLOW_TASKBAR" || message.action === "START_CAPTIONS") {
     broadcastTaskbarToAllTabs({ action: "START_CAPTIONS" });
     if (sendResponse) sendResponse({ status: "ok" });
