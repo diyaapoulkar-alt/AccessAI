@@ -1,8 +1,5 @@
 // AccessAI Injected Google Meet & Shared Site Bottom Yellow Subtitle Taskbar
 (function () {
-  if (window.accessAiTaskbarInjected) return;
-  window.accessAiTaskbarInjected = true;
-
   let taskbarContainer = null;
   let isListening = false;
   let recognition = null;
