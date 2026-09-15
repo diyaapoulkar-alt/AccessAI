@@ -23,7 +23,8 @@ export default function MeetExtensionWidget() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isWidgetDismissed, setIsWidgetDismissed] = useState(false);
-  const [useSimulation, setUseSimulation] = useState(true);
+  const [useSimulation, setUseSimulation] = useState(false);
+  const [showYellowTaskbar, setShowYellowTaskbar] = useState(false);
   const [interimText, setInterimText] = useState('');
   const [captions, setCaptions] = useState([
     { id: 1, speaker: 'Diya Poulkar (Host)', speakerAvatar: 'DP', speakerColor: 'bg-amber-600', text: 'Welcome to Google Meet. AccessAI live extension is active.', timestamp: '10:00 AM' }
@@ -55,7 +56,7 @@ export default function MeetExtensionWidget() {
     }
   };
 
-  const toggleListening = async (simulate = true) => {
+  const toggleListening = async (simulate = false) => {
     if (isListening) {
       stt.stopListening();
       setIsListening(false);
@@ -82,6 +83,13 @@ export default function MeetExtensionWidget() {
     }
   };
 
+  const handleOpenExtension = () => {
+    setShowYellowTaskbar(true);
+    if (!isListening) {
+      toggleListening(false);
+    }
+  };
+
   const getThemeStyles = () => {
     if (captionTheme === 'yellow-black') return 'bg-black text-yellow-300 border-2 border-yellow-400 shadow-yellow-400/20';
     if (captionTheme === 'dark') return 'bg-stone-950 text-white border border-stone-800';
@@ -99,138 +107,186 @@ export default function MeetExtensionWidget() {
   if (isWidgetDismissed) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end select-none font-sans">
-      {!isOpen && (
-        <div className="flex items-center gap-2 bg-stone-950 text-white p-2.5 pl-4 rounded-full border border-stone-800 shadow-2xl backdrop-blur-xl animate-in fade-in duration-200 hover:scale-105 transition">
-          <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setIsOpen(true)}>
-            <div className="relative">
-              <div className="w-8 h-8 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold text-xs shadow-md">
-                {activeAvatar}
+    <>
+      {/* Full Bottom Yellow Subtitle Taskbar (Triggered when Open Extension is clicked) */}
+      {showYellowTaskbar && (
+        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 w-[94%] max-w-[1020px] z-[99999] font-sans animate-in slide-in-from-bottom duration-300 select-none">
+          <div className="bg-black border-4 border-yellow-400 rounded-2xl p-3.5 color-white shadow-[0_20px_40px_rgba(0,0,0,0.9),0_0_30px_rgba(250,204,21,0.4)]">
+            <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/20">
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <span className="bg-emerald-950/80 text-emerald-300 border border-emerald-500 text-[11px] font-extrabold px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+                  LIVE MEET & SITE AUDIO CAPTIONING
+                </span>
+                <span className="text-[11px] font-extrabold text-amber-300 bg-amber-950/80 border border-amber-500 px-3 py-1 rounded-full">
+                  SPEAKER: {activeSpeaker}
+                </span>
               </div>
-              <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-stone-950 ${isListening ? 'bg-emerald-500 animate-ping' : 'bg-stone-500'}`} />
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => toggleListening(false)}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold text-white transition ${
+                    isListening ? 'bg-rose-600 hover:bg-rose-700' : 'bg-emerald-600 hover:bg-emerald-700'
+                  }`}
+                >
+                  {isListening ? '⏹ Stop Captions' : '🎙 Start Device Captions'}
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowYellowTaskbar(false);
+                    stt.stopListening();
+                    setIsListening(false);
+                    const existing = document.getElementById("accessai-meet-taskbar");
+                    if (existing) {
+                      try { existing.remove(); } catch (err) {}
+                    }
+                  }}
+                  className="bg-rose-950/80 hover:bg-rose-900 text-rose-200 border border-rose-600 rounded-xl px-2.5 py-1 text-xs font-bold transition hover:scale-105 cursor-pointer"
+                  title="Close Subtitle Taskbar"
+                >
+                  ✕ Close
+                </button>
+              </div>
             </div>
 
-            <div className="text-left pr-2">
-              <div className="flex items-center gap-1 text-[11px] font-bold text-amber-400">
-                <Video className="w-3 h-3" />
-                <span>Google Meet Extension</span>
-              </div>
-              <p className="text-[11px] font-bold text-stone-300 truncate max-w-[150px]">
-                {isListening ? activeSpeaker : 'Meet Extension Idle'}
-              </p>
+            <div className="text-yellow-300 text-lg md:text-xl font-extrabold leading-snug min-h-[36px] flex items-center tracking-wide">
+              "{currentText}"
             </div>
           </div>
-
-          <button
-            onClick={() => toggleListening(!useSimulation)}
-            className={`p-2 rounded-full font-bold text-xs transition ${
-              isListening ? 'bg-rose-600 text-white animate-pulse' : 'bg-emerald-600 hover:bg-emerald-500 text-white'
-            }`}
-            title={isListening ? 'Stop Meet Live Captions' : 'Start Meet Live Captions'}
-          >
-            {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-          </button>
-
-          <button
-            onClick={() => setIsOpen(true)}
-            className="p-1.5 rounded-full text-stone-400 hover:text-white hover:bg-stone-800 transition"
-            title="Expand Extension Panel"
-          >
-            <ChevronUp className="w-4 h-4" />
-          </button>
         </div>
       )}
 
-      {isOpen && (
-        <div className={`bg-stone-950 text-white border border-stone-800 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-2xl flex flex-col transition-all duration-300 ${
-          isExpanded ? 'w-[440px] h-[600px]' : 'w-[360px] sm:w-[400px] h-[480px]'
-        }`}>
-          <div className="bg-stone-900 border-b border-stone-800 px-4 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center">
-                <Video className="w-4 h-4" />
-              </div>
-              <div>
-                <h4 className="text-xs font-extrabold text-white flex items-center gap-1.5">
-                  Google Meet Analyzer
-                  <span className="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">
-                    LIVE EXTENSION
-                  </span>
-                </h4>
-                <p className="text-[10px] text-stone-400 font-mono">Diarization & Real-Time Captions</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="p-1.5 text-stone-400 hover:text-white rounded-lg hover:bg-stone-800 transition"
-                title={isExpanded ? 'Collapse Panel' : 'Maximize Panel'}
-              >
-                {isExpanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
-              </button>
-
-              <button
-                onClick={() => {
-                  stt.stopListening();
-                  setIsListening(false);
-                  setIsWidgetDismissed(true);
-                }}
-                className="p-1.5 text-stone-400 hover:text-rose-400 rounded-lg hover:bg-rose-950/50 transition"
-                title="Close & Hide Extension Overlay"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-stone-900/60 p-3.5 border-b border-stone-800 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
+      {/* Floating Google Meet Extension Widget (Bottom-Right Dock) */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end select-none font-sans">
+        {!isOpen && (
+          <div className="flex items-center gap-2 bg-stone-950 text-white p-2.5 pl-4 rounded-full border border-stone-800 shadow-2xl backdrop-blur-xl animate-in fade-in duration-200 hover:scale-105 transition">
+            <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setIsOpen(true)}>
               <div className="relative">
-                <div className="w-9 h-9 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold text-xs shadow-md">
+                <div className="w-8 h-8 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold text-xs shadow-md">
                   {activeAvatar}
                 </div>
-                <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border border-stone-900 ${
-                  isListening ? 'bg-emerald-400 animate-ping' : 'bg-stone-500'
-                }`} />
+                <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-stone-950 ${isListening ? 'bg-emerald-500 animate-ping' : 'bg-stone-500'}`} />
               </div>
 
-              <div>
-                <span className="text-[10px] font-extrabold text-emerald-400 uppercase tracking-wider block">
-                  Active Speaker
-                </span>
-                <p className="text-xs font-bold text-white truncate max-w-[190px]">
-                  {activeSpeaker}
+              <div className="text-left pr-2">
+                <div className="flex items-center gap-1 text-[11px] font-bold text-amber-400">
+                  <Video className="w-3 h-3" />
+                  <span>Google Meet Extension</span>
+                </div>
+                <p className="text-[11px] font-bold text-stone-300 truncate max-w-[150px]">
+                  {isListening ? activeSpeaker : 'Meet Extension Idle'}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => toggleListening(false)}
-                className={`px-3 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 ${
-                  isListening && !useSimulation
-                    ? 'bg-rose-600 text-white animate-pulse'
-                    : 'bg-stone-800 hover:bg-stone-700 text-white border border-stone-700'
-                }`}
-              >
-                <Mic className="w-3.5 h-3.5 text-emerald-400" />
-                <span>{isListening && !useSimulation ? 'Mic Live' : 'Mic ON'}</span>
-              </button>
+            <button
+              onClick={handleOpenExtension}
+              className="px-3 py-1.5 rounded-full text-xs font-extrabold bg-yellow-400 hover:bg-yellow-300 text-stone-950 border border-yellow-500 shadow-md transition flex items-center gap-1 hover:scale-105"
+              title="Open Yellow Subtitle Taskbar"
+            >
+              <Sparkles className="w-3.5 h-3.5 fill-current text-stone-900" />
+              <span>Open Extension</span>
+            </button>
 
-              <button
-                onClick={() => toggleListening(true)}
-                className={`px-3 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1 ${
-                  isListening && useSimulation
-                    ? 'bg-amber-600 text-white'
-                    : 'bg-stone-800 hover:bg-stone-700 text-stone-300 border border-stone-700'
-                }`}
-              >
-                <Radio className="w-3 h-3 text-amber-300" />
-                <span>Demo</span>
-              </button>
-            </div>
+            <button
+              onClick={() => setIsOpen(true)}
+              className="p-1.5 rounded-full text-stone-400 hover:text-white hover:bg-stone-800 transition"
+              title="Expand Extension Panel"
+            >
+              <ChevronUp className="w-4 h-4" />
+            </button>
           </div>
+        )}
+
+        {isOpen && (
+          <div className={`bg-stone-950 text-white border border-stone-800 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-2xl flex flex-col transition-all duration-300 ${
+            isExpanded ? 'w-[440px] h-[600px]' : 'w-[360px] sm:w-[400px] h-[480px]'
+          }`}>
+            <div className="bg-stone-900 border-b border-stone-800 px-4 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center">
+                  <Video className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-extrabold text-white flex items-center gap-1.5">
+                    Google Meet Analyzer
+                    <span className="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">
+                      LIVE EXTENSION
+                    </span>
+                  </h4>
+                  <p className="text-[10px] text-stone-400 font-mono">Diarization & Real-Time Captions</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="p-1.5 text-stone-400 hover:text-white rounded-lg hover:bg-stone-800 transition"
+                  title={isExpanded ? 'Collapse Panel' : 'Maximize Panel'}
+                >
+                  {isExpanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+                </button>
+
+                <button
+                  onClick={() => {
+                    stt.stopListening();
+                    setIsListening(false);
+                    setIsWidgetDismissed(true);
+                  }}
+                  className="p-1.5 text-stone-400 hover:text-rose-400 rounded-lg hover:bg-rose-950/50 transition"
+                  title="Close & Hide Extension Overlay"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-stone-900/60 p-3.5 border-b border-stone-800 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="relative">
+                  <div className="w-9 h-9 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold text-xs shadow-md">
+                    {activeAvatar}
+                  </div>
+                  <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border border-stone-900 ${
+                    isListening ? 'bg-emerald-400 animate-ping' : 'bg-stone-500'
+                  }`} />
+                </div>
+
+                <div>
+                  <span className="text-[10px] font-extrabold text-emerald-400 uppercase tracking-wider block">
+                    Active Speaker
+                  </span>
+                  <p className="text-xs font-bold text-white truncate max-w-[190px]">
+                    {activeSpeaker}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => toggleListening(false)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 ${
+                    isListening
+                      ? 'bg-rose-600 text-white animate-pulse'
+                      : 'bg-stone-800 hover:bg-stone-700 text-white border border-stone-700'
+                  }`}
+                >
+                  <Mic className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>{isListening ? 'Mic Live' : 'Mic ON'}</span>
+                </button>
+
+                <button
+                  onClick={handleOpenExtension}
+                  className="px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-yellow-400 hover:bg-yellow-300 text-stone-950 border border-yellow-500 shadow-md transition flex items-center gap-1.5 hover:scale-105"
+                  title="Open Subtitle Taskbar"
+                >
+                  <Sparkles className="w-3.5 h-3.5 fill-current text-stone-900" />
+                  <span>Open Extension</span>
+                </button>
+              </div>
+            </div>
 
           <div className="bg-stone-950 px-4 py-2 border-b border-stone-900 flex items-center justify-between">
             <canvas ref={canvasRef} width={280} height={20} className="w-full h-5 opacity-90" />
@@ -329,5 +385,6 @@ export default function MeetExtensionWidget() {
         </div>
       )}
     </div>
+    </>
   );
 }

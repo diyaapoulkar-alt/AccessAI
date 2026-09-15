@@ -12,7 +12,6 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
           target: { tabId: tabId },
           files: ["content.js"]
         });
-        chrome.tabs.sendMessage(tabId, { action: "START_CAPTIONS" });
       } catch (err) {
         console.warn("Auto-inject on navigation notice:", err);
       }

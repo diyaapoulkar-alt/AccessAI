@@ -90,13 +90,14 @@ class TTSEngine {
 
   startKeepAlive() {
     this.stopKeepAlive();
-    // Chrome bug workaround: speechSynthesis stops after ~15 sec unless paused/resumed periodically
+    // Non-destructive keep-alive indicator to prevent garbage collection without calling synth.pause()
     this.keepAliveInterval = setInterval(() => {
       if (this.synth && this.isSpeaking && !this.isPaused) {
-        this.synth.pause();
-        this.synth.resume();
+        if (this.synth.speaking === false && this.queueIndex < this.textQueue.length) {
+          this.speakNextChunk();
+        }
       }
-    }, 5000);
+    }, 3000);
   }
 
   stopKeepAlive() {
@@ -150,7 +151,11 @@ class TTSEngine {
       if (this.isSpeaking && !this.isPaused) {
         this.queueIndex++;
         if (this.queueIndex < this.textQueue.length) {
-          this.speakNextChunk();
+          setTimeout(() => {
+            if (this.isSpeaking && !this.isPaused) {
+              this.speakNextChunk();
+            }
+          }, 40);
         } else {
           this.stop();
         }
@@ -162,7 +167,11 @@ class TTSEngine {
       if (this.isSpeaking && !this.isPaused) {
         this.queueIndex++;
         if (this.queueIndex < this.textQueue.length) {
-          this.speakNextChunk();
+          setTimeout(() => {
+            if (this.isSpeaking && !this.isPaused) {
+              this.speakNextChunk();
+            }
+          }, 40);
         } else {
           this.stop();
         }

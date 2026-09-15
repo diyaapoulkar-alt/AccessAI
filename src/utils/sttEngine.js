@@ -67,16 +67,23 @@ class STTEngine {
         // Continuous Auto-Reconnection Loop if speech stops after pause
         this.recognition.onend = () => {
           if (this.isListening && !this.useSimulation) {
-            try {
-              this.recognition.start();
-            } catch (e) {
-              console.warn('Speech recognition auto-restart notice:', e);
-            }
+            setTimeout(() => {
+              if (this.isListening && !this.useSimulation) {
+                try {
+                  this.recognition.start();
+                } catch (e) {
+                  // Catch Chrome transition state gracefully
+                }
+              }
+            }, 250);
           }
         };
 
         this.recognition.onerror = (event) => {
           console.warn('Speech recognition error notice:', event.error);
+          if (event.error === 'no-speech' || event.error === 'network' || event.error === 'aborted') {
+            return; // Non-fatal silence/network errors
+          }
           if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
             this.startSimulatedStream();
           }

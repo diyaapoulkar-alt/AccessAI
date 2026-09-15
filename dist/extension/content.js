@@ -27,14 +27,30 @@
     "Welcome to the shared meeting session. AccessAI live audio analyzer is active.",
     "Real-time audio stream detected from shared website. Transcribing speech under 80ms latency.",
     "Active speaker diarization and high-contrast Yellow-on-Black subtitles are active.",
-    "OpenDyslexic typography support enabled for accessible readability.",
-    "Shared screen and device system audio stream verified and operating smoothly."
-  ];
+  // Ensure any existing taskbar from prior injection is cleaned up on script load
+  const initialOldTaskbar = document.getElementById("accessai-meet-taskbar");
+  if (initialOldTaskbar) {
+    initialOldTaskbar.remove();
+  }
+
+  function removeTaskbarFromDOM() {
+    isListening = false;
+    if (taskbarContainer) {
+      try { taskbarContainer.remove(); } catch (e) {}
+      taskbarContainer = null;
+    }
+    const existing = document.getElementById("accessai-meet-taskbar");
+    if (existing) {
+      try { existing.remove(); } catch (e) {}
+    }
+  }
 
   function createBottomTaskbarUI() {
     if (document.getElementById("accessai-meet-taskbar")) {
       const existing = document.getElementById("accessai-meet-taskbar");
-      existing.style.display = "block";
+      existing.style.setProperty("display", "block", "important");
+      taskbarContainer = existing;
+      renderTaskbarContent();
       return;
     }
 
@@ -183,11 +199,10 @@
     const btnHc = document.getElementById("accessai-btn-hc");
 
     if (btnClose) {
-      btnClose.onclick = () => {
-        stopAudioCapture();
-        if (taskbarContainer) {
-          taskbarContainer.style.display = "none";
-        }
+      btnClose.onclick = (e) => {
+        if (e) e.stopPropagation();
+        stopAudioCapture(true);
+        removeTaskbarFromDOM();
       };
     }
 
@@ -384,12 +399,19 @@ reader.readAsDataURL(event.data);
       };
 
       recognition.onerror = (err) => {
+        if (err.error === "no-speech" || err.error === "network" || err.error === "aborted") {
+          return; // Ignore non-fatal silence events
+        }
         console.warn("Speech error:", err);
       };
 
       recognition.onend = () => {
         if (isListening) {
-          try { recognition.start(); } catch (e) {}
+          setTimeout(() => {
+            if (isListening) {
+              try { recognition.start(); } catch (e) {}
+            }
+          }, 250);
         }
       };
 
@@ -399,7 +421,7 @@ reader.readAsDataURL(event.data);
     }
   }
 
-  function stopAudioCapture() {
+  function stopAudioCapture(shouldRemove = false) {
     isListening = false;
     currentSubtitleText = "Captions stopped. Click 'Start Device & Meet Captions' to resume.";
     if (recognition) {
@@ -407,9 +429,9 @@ reader.readAsDataURL(event.data);
       recognition = null;
     }
     if (audioRecorder) {
-  try { audioRecorder.stop(); } catch (e) {}
-  audioRecorder = null;
-}
+      try { audioRecorder.stop(); } catch (e) {}
+      audioRecorder = null;
+    }
     if (audioStream) {
       audioStream.getTracks().forEach(t => t.stop());
       audioStream = null;
@@ -426,7 +448,12 @@ reader.readAsDataURL(event.data);
       try { audioCtx.close(); } catch (e) {}
       audioCtx = null;
     }
-    renderTaskbarContent();
+
+    if (shouldRemove) {
+      removeTaskbarFromDOM();
+    } else {
+      renderTaskbarContent();
+    }
   }
 
   // Listen for extension background triggers
@@ -444,7 +471,4 @@ reader.readAsDataURL(event.data);
       sendResponse({ status: "ok" });
     }
   });
-
-  // Auto create bottom taskbar UI on injection
-  createBottomTaskbarUI();
 })();

@@ -220,7 +220,7 @@ export default function VisionLoudReader() {
       verbatimOcrText = rawBackendText.trim() || `[No text detected in ${fileName}]`;
       setOcrProgress(85);
       const groqSimplified = await simplifyTextWithGroq(verbatimOcrText, 'elementary', targetLang);
-      plainExplanation = groqSimplified || `AccessAI Vision extracted text: "${verbatimOcrText}". Content ready for text-to-speech audio.`;
+      plainExplanation = groqSimplified || verbatimOcrText;
 
       // Compute statistics
       const lines = verbatimOcrText.split('\n').filter(l => l.trim().length > 0).length;
@@ -230,22 +230,21 @@ export default function VisionLoudReader() {
       setExtractedText(verbatimOcrText);
       setAiExplanation(plainExplanation);
 
-      const script = `Attention. Image document analyzed by AccessAI Vision engine. ${plainExplanation.replace(/\*/g, '')}`;
-      setAudioScript(script);
+      const directTextToRead = (ocrMode === 'full' ? verbatimOcrText : plainExplanation).replace(/[*#_`~]/g, ' ').trim();
+      setAudioScript(directTextToRead);
       setIsProcessing(false);
 
-      // Auto play TTS
-      tts.speak(script, { rate: speechRate, voice: selectedVoice });
+      // Auto play TTS directly with clean text (no annoying preamble or headers)
+      tts.speak(directTextToRead, { rate: speechRate, voice: selectedVoice });
     } catch (err) {
       console.warn("Vision processing notice:", err);
       setIsProcessing(false);
       
-      const fallbackText = `Parsed text from ${fileName}. Document processed by AccessAI Vision engine.`;
-      const fallbackExplanation = `AccessAI Vision model extracted text from ${fileName}. Content formatted for loud text-to-speech reading.`;
-
+      const fallbackText = rawBackendText || "No readable text found in document image.";
       setExtractedText(fallbackText);
-      setAiExplanation(fallbackExplanation);
-      setAudioScript(`Attention. Document ${fileName} loaded. ${fallbackExplanation}`);
+      setAiExplanation(fallbackText);
+      setAudioScript(fallbackText);
+      tts.speak(fallbackText, { rate: speechRate, voice: selectedVoice });
     }
   };
 
@@ -253,14 +252,16 @@ export default function VisionLoudReader() {
 
   const handlePlayAudioMode = (modeToPlay) => {
     const activeMode = modeToPlay || ocrMode;
-    const textToRead = activeMode === 'full' 
+    const rawText = activeMode === 'full' 
       ? (extractedText || "No extracted text available.") 
       : (aiExplanation || extractedText || "No summary available.");
+
+    const cleanText = rawText.replace(/[*#_`~]/g, ' ').trim();
 
     if (isPaused) {
       tts.resume();
     } else {
-      tts.speak(textToRead, {
+      tts.speak(cleanText, {
         rate: speechRate,
         voice: selectedVoice
       });
@@ -488,7 +489,10 @@ export default function VisionLoudReader() {
             {/* OCR Mode Selector: Full Loud Reading vs Summarized Loud Reading */}
             <div className="bg-stone-100 p-1.5 rounded-2xl border border-stone-200 flex items-center gap-2">
               <button
-                onClick={() => { setOcrMode('full'); tts.stop(); }}
+                onClick={() => { 
+                  setOcrMode('full'); 
+                  handlePlayAudioMode('full');
+                }}
                 className={`flex-1 py-2 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
                   ocrMode === 'full' 
                     ? 'bg-stone-900 text-white shadow-xs' 
@@ -500,7 +504,10 @@ export default function VisionLoudReader() {
               </button>
 
               <button
-                onClick={() => { setOcrMode('summary'); tts.stop(); }}
+                onClick={() => { 
+                  setOcrMode('summary'); 
+                  handlePlayAudioMode('summary');
+                }}
                 className={`flex-1 py-2 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
                   ocrMode === 'summary' 
                     ? 'bg-emerald-800 text-white shadow-xs' 
