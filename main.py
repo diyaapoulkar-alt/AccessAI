@@ -16,7 +16,7 @@ from typing import Optional
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, Form, Header, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from openai import APIConnectionError, AuthenticationError, OpenAI, RateLimitError
+from openai import APIConnectionError, AuthenticationError, BadRequestError, OpenAI, RateLimitError
 import pytesseract
 
 from alt_text.evaluator import evaluate_alt_text, get_configured_groq_key
@@ -117,6 +117,11 @@ async def evaluate_uploaded_alt_text(
         raise HTTPException(
             status_code=401,
             detail="Invalid GROQ_API_KEY. Please verify your key at https://console.groq.com/keys",
+        ) from error
+    except BadRequestError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Groq rejected the request. Check GROQ_MODEL and request format: {error}",
         ) from error
     except RateLimitError as error:
         raise HTTPException(status_code=429, detail="Groq API quota or rate limit exceeded.") from error
