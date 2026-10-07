@@ -61,59 +61,80 @@ class TTSEngine {
 
     let processed = text;
 
-    // 1. Filter out OS taskbar/browser chrome OCR noise (e.g. 285°C, Monty dowdy, WO ypeheetosarch, etc.)
-    processed = processed.replace(/(?:WO\s+ypeheetosarch|HOO\s+@|285°C|Monty\s+dowdy|Ema\)\s+ove\s+U%).*/gi, '');
+    // 1. Filter out OS taskbar/browser chrome OCR noise & artifacts
+    processed = processed.replace(/(?:WO\s+ypeheetosarch|HOO\s+@|285°C|Monty\s+dowdy|Ema\)\s+ove\s+U%|ypeheetosarch).*/gi, '');
 
-    // 2. Expand abbreviations like "1.Def:" -> "Point 1. Definition: "
-    processed = processed.replace(/\b(\d+)\s*\.\s*Def\s*:/gi, 'Point $1. Definition: ');
-    processed = processed.replace(/\bDef\s*:/gi, 'Definition: ');
+    // 2. Expand common Latin / text abbreviations to prevent false period sentence splits
+    processed = processed
+      .replace(/\bi\.e\./gi, 'that is')
+      .replace(/\be\.g\./gi, 'for example')
+      .replace(/\betc\./gi, 'et cetera')
+      .replace(/\bvs\./gi, 'versus')
+      .replace(/\bDr\./gi, 'Doctor')
+      .replace(/\bMr\./gi, 'Mister')
+      .replace(/\bMrs\./gi, 'Missus')
+      .replace(/\bProf\./gi, 'Professor');
 
-    // 3. Normalize numbered list items like "1.Class" -> "Point 1. Class"
-    processed = processed.replace(/(\d+)\s*\.\s*([A-Za-z])/g, 'Point $1. $2');
+    // 3. Normalize numbered list items with definitions like "1.Def:" or "1. Def:" or "1.Class"
+    // Use comma or colon instead of period so TTS reads it smoothly without hard chunk breaks
+    processed = processed.replace(/\b(\d+)\s*\.\s*Def\s*:\s*/gi, 'Point $1, Definition: ');
+    processed = processed.replace(/\bDef\s*:\s*/gi, 'Definition: ');
+    processed = processed.replace(/\b(\d+)\s*\.\s*([A-Za-z])/g, 'Point $1: $2');
 
-    // 4. Format chemical formulas (CH4, H2O)
+    // 4. Normalize colons and commas so speech doesn't stop with a hard period break or run words together
+    processed = processed.replace(/([a-zA-Z0-9])\s*:\s*([a-zA-Z0-9])/g, '$1, $2');
+    processed = processed.replace(/,([A-Za-z])/g, ', $1');
+
+    // 5. Format chemical formulas (CH4, H2O)
     processed = this.formatChemicalFormulas(processed);
 
-    // 5. Replace colon markers with natural pause indicator
-    processed = processed.replace(/\s*:\s*/g, '. ');
+    // 6. Normalize linebreaks:
+    // - If a line break occurs mid-sentence (line ends without punctuation . ! ? : ;), join with a single space
+    // - Double newlines (\n\n+) indicating paragraph breaks become ". "
+    processed = processed.replace(/([^\.\!\?\:\;\r\n])\r?\n([^\r\n])/g, '$1 $2');
+    processed = processed.replace(/\r?\n+/g, '. ');
 
-    // 6. Preserve linebreaks by converting newlines into explicit sentence pauses
-    processed = processed.replace(/\r?\n+/g, '. \n');
+    // 7. Expand ampersands (& -> and) for seamless reading
+    processed = processed.replace(/\s*&\s*/g, ' and ');
+
+    // 8. Collapse multiple whitespace/spaces to a single space
+    processed = processed.replace(/[ \t]+/g, ' ').replace(/\s*\.\s*\./g, '.');
 
     return processed;
   }
 
   splitIntoChunks(text) {
     if (!text) return [];
-    
+
     // Format text for natural pronunciation and speech cadence
     const formattedText = this.formatTextForNaturalSpeech(text);
 
     // Remove raw markdown symbols (*, #, _, `, ~)
-    const cleanText = formattedText.replace(/[*#_`~]/g, ' ').replace(/[ \t]+/g, ' ').trim();
+    const cleanText = formattedText.replace(/[*#_`~]/g, ' ').replace(/\s+/g, ' ').trim();
     if (!cleanText) return [];
 
-    // Split by sentence terminators (. ! ? ; \n) or linebreaks
-    const rawSentences = cleanText.split(/(?<=[.?!;\n])\s+/);
+    // Split by true sentence boundaries (. ! ?) followed by whitespace or end of string
+    const rawSentences = cleanText.split(/(?<=[.!?])\s+/);
     const chunks = [];
+    let currentChunk = '';
 
     for (let sentence of rawSentences) {
-      sentence = sentence.trim();
-      if (!sentence) continue;
+      const trimmed = sentence.trim();
+      if (!trimmed) continue;
 
-      // Clean trailing duplicate periods
-      sentence = sentence.replace(/\.+/g, '.').trim();
-
-      // If sentence is longer than 140 characters, break by comma or spaces
-      if (sentence.length > 140) {
-        const subParts = sentence.match(/.{1,130}(?:,|\s+|$)/g) || [sentence];
-        for (let sub of subParts) {
-          const trimmed = sub.trim();
-          if (trimmed) chunks.push(trimmed);
-        }
+      // Combine short sentences / list items into chunks up to ~320 characters for fluid speech
+      if (!currentChunk) {
+        currentChunk = trimmed;
+      } else if ((currentChunk + ' ' + trimmed).length <= 320) {
+        currentChunk += ' ' + trimmed;
       } else {
-        chunks.push(sentence);
+        chunks.push(currentChunk);
+        currentChunk = trimmed;
       }
+    }
+
+    if (currentChunk) {
+      chunks.push(currentChunk);
     }
 
     return chunks.length > 0 ? chunks : [cleanText];
@@ -182,11 +203,7 @@ class TTSEngine {
       if (this.isSpeaking && !this.isPaused) {
         this.queueIndex++;
         if (this.queueIndex < this.textQueue.length) {
-          setTimeout(() => {
-            if (this.isSpeaking && !this.isPaused) {
-              this.speakNextChunk();
-            }
-          }, 250); // Natural 250ms pause between sentences and line breaks
+          this.speakNextChunk();
         } else {
           this.stop();
         }
@@ -198,11 +215,7 @@ class TTSEngine {
       if (this.isSpeaking && !this.isPaused) {
         this.queueIndex++;
         if (this.queueIndex < this.textQueue.length) {
-          setTimeout(() => {
-            if (this.isSpeaking && !this.isPaused) {
-              this.speakNextChunk();
-            }
-          }, 250);
+          this.speakNextChunk();
         } else {
           this.stop();
         }
