@@ -21,7 +21,13 @@ import pytesseract
 
 from alt_text.evaluator import evaluate_alt_text, get_configured_groq_key
 from alt_text.prompts import PROMPT_TEMPLATES
-from ocr.ocr_engine import TESSERACT_PATH, extract_sign_text, extract_text
+from ocr.ocr_engine import (
+    TESSERACT_PATH,
+    extract_sign_text,
+    extract_text,
+    extract_text_with_confidence,
+    hybrid_ai_ocr,
+)
 from stt.whisper_engine import transcribe_audio
 
 # Load environment variables
@@ -171,29 +177,62 @@ async def transcribe_uploaded_audio(
 @app.post("/ocr")
 async def extract_uploaded_text(
     image: UploadFile = File(...),
-    mode: str = Form("document"),  # 'document' or 'sign'
+    mode: str = Form("document"),  # 'document', 'sign', or 'prescription'
     preprocess: bool = Form(True),
+    smart_correct: bool = Form(False),
+    extract_entities: bool = Form(False),
+    domain: Optional[str] = Form(None),
+    groq_api_key: Optional[str] = Form(None),
+    x_groq_api_key: Optional[str] = Header(None, alias="X-Groq-Api-Key"),
+    authorization: Optional[str] = Header(None),
 ):
-    """Extract text from an uploaded document, prescription, receipt, or street sign."""
+    """
+    Extract text, confidence metrics, and structured entities from an uploaded document,
+    prescription, invoice, or street sign.
+    Supports both offline local Tesseract recognition and hybrid AI enhancement (Groq Vision Qwen 3.8).
+    """
+    effective_key = groq_api_key or x_groq_api_key
+    if not effective_key and authorization and authorization.lower().startswith("bearer "):
+        effective_key = authorization[7:].strip()
+
     suffix = Path(image.filename or "image.jpg").suffix or ".jpg"
     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as temporary_file:
         shutil.copyfileobj(image.file, temporary_file)
         temporary_path = Path(temporary_file.name)
 
     try:
-        if mode == "sign":
-            text = extract_sign_text(temporary_path)
-        else:
-            text = extract_text(temporary_path, preprocess=preprocess)
+        # If smart correction, entity extraction, or explicit domain is requested, run hybrid AI OCR
+        if smart_correct or extract_entities or domain:
+            payload = hybrid_ai_ocr(
+                image_path=temporary_path,
+                domain=domain,
+                api_key=effective_key,
+                smart_correct=smart_correct,
+                extract_entities=extract_entities,
+                mode=mode,
+            )
+            return payload
+
+        # Otherwise run high-fidelity local Tesseract with word confidence
+        meta = extract_text_with_confidence(
+            image_path=temporary_path,
+            preprocess=preprocess,
+            mode=mode,
+            auto_rotate=True,
+        )
         return {
             "mode": mode,
-            "text": text,
-            "character_count": len(text),
+            "text": meta["text"],
+            "character_count": meta["character_count"],
+            "confidence": meta["confidence"],
+            "word_count": meta["word_count"],
+            "orientation_corrected_degrees": meta["orientation_corrected_degrees"],
         }
     except (FileNotFoundError, RuntimeError) as error:
         raise HTTPException(status_code=400, detail=str(error)) from error
     finally:
         temporary_path.unlink(missing_ok=True)
+
 
 
 @app.post("/transcribe")

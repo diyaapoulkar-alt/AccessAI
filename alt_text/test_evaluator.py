@@ -15,7 +15,16 @@ from alt_text.evaluator import (
 )
 from alt_text.prompts import PROMPT_TEMPLATES
 from alt_text.test_cases import ALT_TEXT_BENCHMARK_CASES
-from ocr.ocr_engine import extract_text, preprocess_image_for_ocr
+from ocr.ocr_engine import (
+    auto_rotate_image,
+    extract_text,
+    extract_text_with_confidence,
+    hybrid_ai_ocr,
+    preprocess_image_for_ocr,
+    super_resolve_and_denoise,
+    _heuristic_classify_domain,
+    _heuristic_extract_entities,
+)
 from PIL import Image
 
 
@@ -88,7 +97,83 @@ def test_prompt_templates_registry():
     assert "alt_text_evaluator" in PROMPT_TEMPLATES
     assert "document_ocr_explainer" in PROMPT_TEMPLATES
     assert "sign_warning_explainer" in PROMPT_TEMPLATES
+    assert "ocr_entity_extractor" in PROMPT_TEMPLATES
+    assert "ocr_speech_synthesizer" in PROMPT_TEMPLATES
     assert len(PROMPT_TEMPLATES["alt_text_evaluator"]["template"]) > 50
+
+
+def test_auto_rotate_image_and_super_resolve():
+    img = Image.new("RGB", (120, 80), color=(255, 255, 255))
+    rotated, angle = auto_rotate_image(img)
+    assert angle == 0
+    assert rotated.size == (120, 80)
+
+    upscaled = super_resolve_and_denoise(img, scale=2.0)
+    assert upscaled.mode == "L"
+    assert upscaled.size == (240, 160)
+
+
+def test_heuristic_domain_classification():
+    assert _heuristic_classify_domain("Amoxicillin 500mg PO TID refill 2") == "medical_prescription"
+    assert _heuristic_classify_domain("Total due: $45.99 on invoice #1002") == "invoice"
+    assert _heuristic_classify_domain("DANGER: High Voltage Keep Away") == "street_sign"
+    assert _heuristic_classify_domain("Welcome to the conference") == "general"
+
+
+def test_heuristic_entity_extraction():
+    entities = _heuristic_extract_entities("Rx: Amoxicillin 500mg. Total bill: $12.50. Caution: Keep dry. Date: 12/04/2026")
+    assert "$12.50" in entities.get("monetary_amounts", [])
+    assert "500mg" in entities.get("dosages", [])
+    assert "CAUTION" in entities.get("hazard_keywords", [])
+    assert "12/04/2026" in entities.get("dates", [])
+
+
+def test_extract_text_with_confidence_on_blank():
+    img = Image.new("RGB", (100, 50), color=(255, 255, 255))
+    test_p = Path("temp_unit_test.png")
+    try:
+        img.save(test_p)
+        res = extract_text_with_confidence(test_p)
+        assert "text" in res
+        assert "confidence" in res
+        assert "word_count" in res
+        assert "character_count" in res
+        assert "orientation_corrected_degrees" in res
+        assert isinstance(res["words"], list)
+    finally:
+        test_p.unlink(missing_ok=True)
+
+
+@patch("openai.OpenAI")
+def test_hybrid_ai_ocr_with_mock(mock_openai_class):
+    mock_client = MagicMock()
+    mock_openai_class.return_value = mock_client
+    mock_response = MagicMock()
+    mock_response.choices = [
+        MagicMock(
+            message=MagicMock(
+                content='{"domain": "medical_prescription", "corrected_text": "AMOXICILLIN 500 MG", "entities": {"medication": "Amoxicillin", "dose": "500mg"}, "audio_script": "Amoxicillin five hundred milligrams", "notes": "Clean scan"}'
+            )
+        )
+    ]
+    mock_client.chat.completions.create.return_value = mock_response
+
+    img = Image.new("RGB", (100, 50), color=(255, 255, 255))
+    test_p = Path("temp_hybrid_test.png")
+    try:
+        img.save(test_p)
+        result = hybrid_ai_ocr(
+            image_path=test_p,
+            api_key="gsk_mock_hybrid_key",
+            smart_correct=True,
+            extract_entities=True,
+        )
+        assert result["domain"] == "medical_prescription"
+        assert result["corrected_text"] == "AMOXICILLIN 500 MG"
+        assert result["entities"]["medication"] == "Amoxicillin"
+        assert "audio_script" in result
+    finally:
+        test_p.unlink(missing_ok=True)
 
 
 def test_ocr_engine_extract_text_on_test_image():
@@ -155,8 +240,9 @@ def test_fastapi_config_and_ocr_endpoints():
     res_pt = client.get("/prompt-templates")
     assert res_pt.status_code == 200
     assert "alt_text_evaluator" in res_pt.json()
+    assert "ocr_entity_extractor" in res_pt.json()
 
-    # 3. Test /ocr with synthetic image
+    # 3. Test /ocr with synthetic image (basic mode)
     img = Image.new("RGB", (250, 70), color=(255, 255, 255))
     buf = BytesIO()
     img.save(buf, format="PNG")
@@ -168,7 +254,11 @@ def test_fastapi_config_and_ocr_endpoints():
         data={"mode": "document", "preprocess": "true"},
     )
     assert res_ocr.status_code == 200
-    assert res_ocr.json()["mode"] == "document"
+    data_ocr = res_ocr.json()
+    assert data_ocr["mode"] == "document"
+    assert "confidence" in data_ocr
+    assert "character_count" in data_ocr
+    assert "orientation_corrected_degrees" in data_ocr
 
 
 @patch("alt_text.evaluator.OpenAI")

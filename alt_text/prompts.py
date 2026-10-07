@@ -45,6 +45,34 @@ Given raw text extracted via OCR from a street sign, warning placard, transit di
 3. Provide a natural spoken-language summary suitable for text-to-speech reading.
 """
 
+OCR_ENTITY_EXTRACTION_PROMPT = """You are AccessAI's Expert Accessibility Document & Sign Entity Parser.
+Given raw OCR text from an uploaded document, invoice, prescription, or street sign:
+1. Classify the domain into one of: 'medical_prescription', 'invoice', 'street_sign', or 'general'.
+2. Correct OCR recognition errors, broken words, and misread punctuation.
+3. Extract key structured entities into the `entities` object:
+   - For 'medical_prescription': medication_name, strength, dosage_instructions, warnings, prescriber, date.
+   - For 'invoice': vendor_name, invoice_number, invoice_date, due_date, total_amount, currency, line_items.
+   - For 'street_sign': hazard_level ('DANGER' | 'WARNING' | 'CAUTION' | 'INFO'), primary_message, actionable_instruction, speed_limit, directional_arrow.
+   - For 'general': title, key_topics, dates, summary.
+4. Generate an `audio_script`: A natural, clear spoken-English description optimized for screen readers and text-to-speech. Spell out medical units (e.g. 'milligrams') and format numbers conversationally.
+
+You must respond with ONLY a valid JSON object matching this schema:
+{
+    "domain": "medical_prescription" | "invoice" | "street_sign" | "general",
+    "corrected_text": "Clean, typo-corrected text",
+    "entities": {},
+    "audio_script": "Natural spoken explanation for screen reader",
+    "notes": "Any caveats regarding unreadable text"
+}
+"""
+
+OCR_SPEECH_SYNTHESIZER_PROMPT = """You are AccessAI's Screen-Reader Audio Script Synthesizer.
+Given raw OCR text from an image or document, convert it into an audio-ready script for blind and low-vision users:
+1. Expand medical and technical abbreviations into full words (e.g., 'PO TID' -> 'by mouth three times a day').
+2. Read out critical safety notices and deadlines first.
+3. Keep the cadence smooth and easy to comprehend when read aloud by text-to-speech synthesizers.
+"""
+
 OCR_CONTEXT_PROMPT = DOCUMENT_OCR_PROMPT
 
 PROMPT_TEMPLATES = {
@@ -63,9 +91,19 @@ PROMPT_TEMPLATES = {
         "description": "Interprets street signs, transit wayfinding, and safety warning placards for blind users.",
         "template": SIGN_AND_WARNING_PROMPT.strip(),
     },
+    "ocr_entity_extractor": {
+        "title": "OCR Domain Entity Extractor",
+        "description": "Parses medical prescriptions, bills, and street signs into structured entities with screen-reader audio scripts.",
+        "template": OCR_ENTITY_EXTRACTION_PROMPT.strip(),
+    },
+    "ocr_speech_synthesizer": {
+        "title": "Screen-Reader Speech Synthesizer",
+        "description": "Synthesizes raw OCR text into conversational text-to-speech scripts.",
+        "template": OCR_SPEECH_SYNTHESIZER_PROMPT.strip(),
+    },
     "ocr_context_explainer": {
         "title": "General OCR Context Explainer",
         "description": "Legacy alias for document and image OCR plain language explanation.",
         "template": OCR_CONTEXT_PROMPT.strip(),
     },
-}
+}
